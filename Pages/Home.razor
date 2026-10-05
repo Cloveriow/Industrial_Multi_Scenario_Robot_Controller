@@ -15,23 +15,23 @@
                 <span class="badge ros-badge">Scenario: @activeScenarioName</span>
                 <span class="badge-topic">Planner: @plannerStatus</span>
             </div>
-            <!-- 🖱️ 左下角滑鼠 3D 世界座標顯示區 (ROS 2 Z-Up 標準: X: Rail, Y: Conveyor, Z: Height) -->
+            <!-- 🖱️ 左下角滑鼠 3D 世界座標顯示區 -->
             <div class="overlay-bottom-left">
-                <span id="mouse-coords" class="badge-topic mouse-badge">🖱️ ROS2 World (Z-Up): (X: 0.000, Y: 0.000, Z: 0.000)m</span>
+                <span id="mouse-coords" class="badge-topic mouse-badge">World Coordinates (Z-Up): (X: 0.000, Y: 0.000, Z: 0.000)m</span>
             </div>
         </div>
 
         <div class="control-section">
             <div class="panel-header">
-                <h2>🦾 Industrial Multi-Scenario Robot Controller</h2>
-                <p>SEMI E84 Cleanroom | 7-DOF Linear Rail | Fully-Auto Conveyor Tracking</p>
+                <h2>Station Controller - SEMI E30 SECS/GEM</h2>
+                <p>SEMI E84 Cleanroom | 7-DOF Linear Rail | Conveyor Tracking Cell</p>
             </div>
 
-            <!-- 🎛️ 情境切換頁籤 (Scenario Switcher) -->
+            <!-- 🎛️ 情境切換頁籤 -->
             <div class="scenario-tabs">
-                <button class="@(activeScenario == 1 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(1)">1. SEMI E84 晶圓</button>
-                <button class="@(activeScenario == 2 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(2)">2. 7-DOF 橫向滑軌</button>
-                <button class="@(activeScenario == 3 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(3)">3. 雙輸送帶追蹤</button>
+                <button class="@(activeScenario == 1 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(1)">1. SEMI E84 Wafer</button>
+                <button class="@(activeScenario == 2 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(2)">2. 7-DOF Rail</button>
+                <button class="@(activeScenario == 3 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(3)">3. Conveyor Tracking</button>
             </div>
 
             <hr />
@@ -40,7 +40,7 @@
             @if (activeScenario == 1)
             {
                 <div class="e84-signal-box">
-                    <div class="e84-title">🚥 SEMI E84 PI/O Signal Status</div>
+                    <div class="e84-title">SEMI E84 PI/O Signal Status</div>
                     <div class="e84-grid">
                         <div class="@GetE84Class(e84Valid)">VALID</div>
                         <div class="@GetE84Class(e84Cs0)">CS_0</div>
@@ -54,57 +54,62 @@
                 </div>
 
                 <div class="ik-input-box">
-                    <h4>📡 1. SECS/GEM + SEMI E84 Trigger</h4>
+                    <h4>Host Commands (S2F41)</h4>
                     <div class="host-btn-grid">
-                        <button class="btn-sec-cmd" @onclick="SendHostCmdStartGrasp" style="background:#d90429;" disabled="@isExecutingTask">S2F41: STRESS_TEST</button>
-                        <button class="btn-sec-cmd" @onclick="SendHostCmdRetract">S2F41: RETRACT</button>
+                        <button class="btn-sec-cmd" @onclick="SendHostCmdStartGrasp" style="background:#d90429;" disabled="@isExecutingTask">▶ TRANSFER_REQ</button>
+                        <button class="btn-sec-cmd" @onclick="SendHostCmdRetract">↩ RETRACT</button>
                     </div>
-                    <button class="btn-scramble" style="margin-top:5px;" @onclick="RandomizeScene">🎲 生成新晶圓 + J1~J6 隨機化</button>
+                    <button class="btn-scramble" style="margin-top:5px;" @onclick="RandomizeScene">↻ INIT SCENARIO</button>
                 </div>
             }
             else if (activeScenario == 2)
             {
                 <!-- 🚊 情境 2 專用：7-DOF 橫向導軌控制面板 -->
                 <div class="ik-input-box">
-                    <h4>🚊 2. 7-DOF Linear Rail Multi-Station Transfer</h4>
+                    <h4>Multi-Station Transfer Control</h4>
                     <div class="host-btn-grid">
-                        <button class="btn-sec-cmd" @onclick="SendHostCmdStartGrasp" style="background:#007acc;" disabled="@isExecutingTask">🚀 發動 7-DOF 跨站點移載</button>
-                        <button class="btn-sec-cmd" @onclick="SendHostCmdRetract">HOME 歸位</button>
+                        <button class="btn-sec-cmd" @onclick="SendHostCmdStartGrasp" style="background:#007acc;" disabled="@isExecutingTask">▶ EXECUTE TRANSFER</button>
+                        <button class="btn-sec-cmd" @onclick="SendHostCmdRetract">🏠 RETURN TO HOME</button>
                     </div>
-                    <div class="debug-row" style="margin-top:4px;"><b>導軌 X 位置 (Rail X):</b> <span style="color:#00ffcc; font-weight:bold;">@xRailPos.ToString("F3") m</span></div>
-                    <button class="btn-scramble" style="margin-top:5px;" @onclick="RandomizeScene">🎲 滑軌 + 物體重置</button>
+                    <div class="debug-row" style="margin-top:4px;"><b>Rail X Position:</b> <span style="color:#00ffcc; font-weight:bold;">@xRailPos.ToString("F3") m</span></div>
+                    <button class="btn-scramble" style="margin-top:5px;" @onclick="RandomizeScene">↻ INIT SCENARIO</button>
                 </div>
             }
             else if (activeScenario == 3)
             {
-                <!-- 🏭 情境 3 專用：全自動雙輸送帶追蹤控制面板 -->
+                <!-- 🏭 情境 3 專用：SECS/GEM 輸送帶追蹤製程單元 -->
                 <div class="ik-input-box">
-                    <h4>🏭 3. Fully-Automated Conveyor Tracking & Transfer</h4>
-                    <div class="debug-row" style="margin-top:2px;"><b>運作模式:</b> <span style="color:#28a745; font-weight:bold;">🟢 CEID 1010 絕對鎖相磁浮追蹤 (Absolute Phase-Lock)</span></div>
-                    <div class="debug-row"><b>Belt A (進料速度):</b> <span style="color:#00ffcc">0.12 m/s (無感測躍變，防瞬移)</span></div>
-                    <div class="debug-row"><b>Belt B (出料速度):</b> <span style="color:#00ffcc">0.12 m/s (自動擺正回收)</span></div>
-                    <div class="debug-row"><b>進料感測:</b> <span style="color:#ffb703">Y=-0.60m 門相機預測 (拒絕滯後追空)</span></div>
-                    <button class="btn-scramble" style="margin-top:5px;" @onclick="SendHostCmdRetract">⏸ 緊急停止 / 重置歸位</button>
+                    <h4>Conveyor Cell Control</h4>
+                    <div class="host-btn-grid">
+                        <button class="btn-sec-cmd" style="background:#28a745;" @onclick='() => Scenario3HostCmd("START")'>▶ START</button>
+                        <button class="btn-sec-cmd" @onclick='() => Scenario3HostCmd(_pauseReq ? "RESUME" : "PAUSE")'>@(_pauseReq ? "▶ RESUME" : "⏸ PAUSE")</button>
+                    </div>
+                    <div class="host-btn-grid">
+                        <button class="btn-sec-cmd" @onclick='() => Scenario3HostCmd("STOP")'>⏹ STOP</button>
+                        <button class="btn-sec-cmd" style="background:#d90429;" @onclick='() => Scenario3HostCmd("ABORT")'>⛔ ABORT</button>
+                    </div>
+                    <div class="debug-row"><b>Process State:</b> <span style="color:#00ffcc">@cellState</span> (E10: @E10Category)</div>
+                    <div class="debug-row"><b>Belt Speed (EKF):</b> <span style="color:#00ffcc">@_kfY.Velocity.ToString("F3") m/s</span></div>
+                    <div class="debug-row"><b>Yield (Pick/Skip/Miss):</b> @cellPicked / @cellSkipped / @cellMissed &nbsp; <b>ALM:</b> @cellAlarms</div>
+                    <div class="debug-row"><b>UPH:</b> <span style="color:#ffb703">@Uph.ToString("F0")</span> &nbsp; <b>CT:</b> @_lastCycleS.ToString("F2") s &nbsp; <b>Sync Err:</b> @_trackErrMm.ToString("F1") mm</div>
                 </div>
             }
 
-            <!-- 實時自適應參數與感測器監控面板 -->
+            <!-- 實時參數與感測器監控面板 -->
             <div class="debug-panel">
-                <div class="debug-row"><b>設備狀態:</b> <span style="color:#00d2ff">@gemControlState</span></div>
-                <div class="debug-row"><b>📡 移載規程:</b> <span style="color:#00d2ff">Cycle-Time 動態預測 ➜ 零滯後無縫貼合</span></div>
-                <div class="debug-row"><b>🔄 閥門保護 TCP 偏距 (L_TCP):</b> <span style="color:#00ffcc; font-weight:bold;">@adaptiveL_TCP.ToString("F4") m</span></div>
-                <div class="debug-row"><b>🛡️ 導納力控退讓量 (Admittance Z):</b> <span style="color:#ffb703; font-weight:bold;">@admittanceOffsetZ.ToString("F4") m</span></div>
-                <div class="debug-row"><b>📷 RGB-D EKF 姿態估算:</b> <span style="color:#ffb703">(<span style="color:#00d2ff">@estX.ToString("F3")</span>, <span style="color:#00d2ff">@estY.ToString("F3")</span>, <span style="color:#00d2ff">@estZ.ToString("F3")</span>) Yaw:<span style="color:#00d2ff">@estYaw.ToString("F1")°</span></span></div>
-                <div class="debug-row"><b>🎯 真實物體真值 (GT):</b> <span style="color:#00ffcc">(<span style="color:#00ffcc">@gtX.ToString("F3")</span>, <span style="color:#00ffcc">@gtY.ToString("F3")</span>, <span style="color:#00ffcc">@gtZ.ToString("F3")</span>) Yaw:<span style="color:#00ffcc">@gtYaw.ToString("F1")°</span></span></div>
-                <div class="debug-row"><b>指墊觸覺壓力:</b> <span style="color:#28a745">L: @pressureLeft.ToString("F1") kPa / R: @pressureRight.ToString("F1") kPa</span></div>
-                <div class="debug-row highlight"><b>運動學推算 TCP (FK Z-Up):</b> (<span style="color:#00ffcc">@fkTcpX.ToString("F3")</span>, <span style="color:#00ffcc">@fkTcpY.ToString("F3")</span>, <span style="color:#00ffcc">@fkTcpZ.ToString("F3")</span>)</div>
-                <div class="debug-row"><b>絕對編碼器 (Enc J1-J6):</b> @encJ1.ToString("F0")° / @encJ2.ToString("F0")° / @encJ3.ToString("F0")° / @encJ4.ToString("F0")° / @encJ5.ToString("F0")° / @encJ6.ToString("F0")°</div>
-                <div class="debug-row"><b>系統診斷:</b> @diagnosticMessage</div>
+                <div class="debug-row"><b>Control State:</b> <span style="color:#00d2ff">@gemControlState</span></div>
+                <div class="debug-row"><b>Adaptive TCP Z-Offset:</b> <span style="color:#00ffcc; font-weight:bold;">@adaptiveL_TCP.ToString("F4") m</span></div>
+                <div class="debug-row"><b>Admittance Z-Yield:</b> <span style="color:#ffb703; font-weight:bold;">@admittanceOffsetZ.ToString("F4") m</span></div>
+                <div class="debug-row"><b>RGB-D EKF Pose:</b> <span style="color:#ffb703">(<span style="color:#00d2ff">@estX.ToString("F3")</span>, <span style="color:#00d2ff">@estY.ToString("F3")</span>, <span style="color:#00d2ff">@estZ.ToString("F3")</span>) Yaw:<span style="color:#00d2ff">@estYaw.ToString("F1")°</span></span></div>
+                <div class="debug-row"><b>Tactile Pressure:</b> <span style="color:#28a745">L: @pressureLeft.ToString("F1") / R: @pressureRight.ToString("F1") kPa</span></div>
+                <div class="debug-row highlight"><b>Forward Kinematics TCP:</b> (<span style="color:#00ffcc">@fkTcpX.ToString("F3")</span>, <span style="color:#00ffcc">@fkTcpY.ToString("F3")</span>, <span style="color:#00ffcc">@fkTcpZ.ToString("F3")</span>)</div>
+                <div class="debug-row"><b>Encoders (J1-J6):</b> @encJ1.ToString("F0")° / @encJ2.ToString("F0")° / @encJ3.ToString("F0")° / @encJ4.ToString("F0")° / @encJ5.ToString("F0")° / @encJ6.ToString("F0")°</div>
+                <div class="debug-row"><b>Diagnostics:</b> @diagnosticMessage</div>
             </div>
 
-            <!-- 📜 SECS-II / Transfer Log Console (擴展至 160px，無遮擋視野) -->
+            <!-- 📜 SECS-II / Transfer Log Console -->
             <div class="sec-console" style="height: 160px;">
-                <div class="console-title">📜 SECS-II / Transfer Log</div>
+                <div class="console-title">SECS-II Event Log</div>
                 <div class="console-body">
                     @foreach (var log in secsLogs)
                     {
@@ -114,7 +119,7 @@
             </div>
 
             <div class="@GraspStatusClass" style="margin-top: 6px;">
-                <span>🎯 最終結果：<b>@(isTransferDone ? "✅ 當前情境直拿直放移載作業完美完成！" : "⏳ 等待指令觸發")</b></span>
+                <span>Status: <b>@(isTransferDone ? "✅ SEQUENCE COMPLETED" : "⏳ AWAITING COMMAND")</b></span>
             </div>
         </div>
     </div>
@@ -122,8 +127,8 @@
     <!-- 📷 512x512 高解析度第一人稱視野 HUD -->
     <div class="rgbd-preview-container">
         <div class="rgbd-header">
-            <span>📷 Eye-in-Hand RGB-D Point-of-View (512x512 Sensor Stream)</span>
-            <span class="rgbd-status">LIVE | 30FPS Real-time CMOS Noise</span>
+            <span>Eye-in-Hand RGB-D Vision System</span>
+            <span class="rgbd-status">LIVE STREAM | 30 FPS</span>
         </div>
         <div class="rgbd-viewport">
             <div id="rgbd-canvas" class="rgbd-canvas-area"></div>
@@ -229,15 +234,15 @@
 
     private readonly struct KinematicGuardLimits
     {
-        public double MaxJointVelocity { get; init; }      
-        public double MaxJointAcceleration { get; init; }  
-        public double MaxAngleJumpPerFrame { get; init; }  
-        public double GearboxBacklashDeg { get; init; }    
+        public double MaxJointVelocity { get; init; }
+        public double MaxJointAcceleration { get; init; }
+        public double MaxAngleJumpPerFrame { get; init; }
+        public double GearboxBacklashDeg { get; init; }
 
         public static KinematicGuardLimits Default => new KinematicGuardLimits
         {
-            MaxJointVelocity = 150.0,      
-            MaxJointAcceleration = 300.0,  
+            MaxJointVelocity = 150.0,
+            MaxJointAcceleration = 300.0,
             MaxAngleJumpPerFrame = 3.0,
             GearboxBacklashDeg = 0.05
         };
@@ -249,55 +254,53 @@
     private const double FRICTION_MU = 0.65;
     private const double M1 = 3.0, M2 = 2.0, M3 = 1.2, M_EE = 0.8, M_BOX = 0.35;
     private const double L1 = 0.8, L2 = 0.6, L_TCP_NOMINAL = 0.22;
-    private const double SHOULDER_Z = 1.0;               
+    private const double SHOULDER_Z = 1.0;
     private const double SOLID_GRIP_LIMIT = 0.118;
-    private const double GROUND_Z = 0.06;                
+    private const double GROUND_Z = 0.06;
     private const double MIN_OVERLAP_RATIO_LIMIT = 0.65;
     private const double MAX_TIPPING_TORQUE_LIMIT = 0.15;
     private const double NORMAL_FORCE_SOLID = 12.0;
 
     private const double FAB_HOME_J1 = 0.0;
-    private const double FAB_HOME_J2 = -65.0; 
-    private const double FAB_HOME_J3 = 130.0; 
-    private const double FAB_HOME_J4 = 25.0;  
+    private const double FAB_HOME_J2 = -65.0;
+    private const double FAB_HOME_J3 = 130.0;
+    private const double FAB_HOME_J4 = 25.0;
     private const double FAB_HOME_J5 = 0.0;
     private const double FAB_HOME_J6 = 0.0;
     private const double FAB_HOME_GRIP = 0.24;
 
-    private const double ADMITTANCE_M = 0.5;   
-    private const double ADMITTANCE_B = 45.0;  
-    private const double ADMITTANCE_K = 220.0; 
-    private const double DESIRED_CONTACT_FORCE = 12.0; 
+    private const double ADMITTANCE_M = 0.5;
+    private const double ADMITTANCE_B = 45.0;
+    private const double ADMITTANCE_K = 220.0;
+    private const double DESIRED_CONTACT_FORCE = 12.0;
 
     private readonly SemaphoreSlim _simLock = new SemaphoreSlim(1, 1);
     private CancellationTokenSource _cts;
     private DateTime _lastUiRenderTime = DateTime.MinValue;
-    private const int UI_RENDER_INTERVAL_MS = 33; 
+    private const int UI_RENDER_INTERVAL_MS = 33;
 
     private bool isExecutingTask = false;
-    private bool isWaitingForStagingRecovery = false; // 紀錄是否需要主動飛回迎擊準備點
 
-    private int activeScenario = 1; 
+    private int activeScenario = 1;
     private string activeScenarioName => activeScenario switch {
         1 => "SEMI E84 Wafer Handling",
         2 => "7-DOF Linear Rail Station",
-        3 => "Fully-Auto Conveyor Line",
+        3 => "Conveyor Tracking Cell",
         _ => "Unknown"
     };
 
-    private double xRailPos = 0.0; 
+    private double xRailPos = 0.0;
 
-    private double adaptiveL_TCP = L_TCP_NOMINAL;       
-    private double adaptiveGroundZ = GROUND_Z;           
-
+    private double adaptiveL_TCP = L_TCP_NOMINAL;
+    private double adaptiveGroundZ = GROUND_Z;
     private double activePayloadMass = 0.0;
 
     private string plannerStatus = "IDLE";
-    private string gemControlState = "REMOTE / ONLINE";
+    private string gemControlState = "REMOTE";
     private string boxPhysicsStatus = "Grounded";
-    private string diagnosticMessage = "多情境模組化機器人控制器就緒。";
+    private string diagnosticMessage = "System Ready. Awaiting Host Command.";
     private string overlapStatus = "SAFE";
-    private string currentJobId = "JOB_WAFER_8801";
+    private string currentJobId = "JOB_WFR_001";
 
     private string e84State = "E84_IDLE";
     private bool e84Valid = false, e84Cs0 = false, e84TrReq = false, e84Busy = false, e84Comp = false, e84Ready = false;
@@ -306,8 +309,6 @@
 
     private double realX = 0.25, realY = 0.75, realZ = GROUND_Z;
     private double boxRotX = 0, boxRotY = 0, boxRotZ = 0;
-
-    private double gtX = 0.25, gtY = 0.75, gtZ = GROUND_Z, gtYaw = 0.0;
 
     private double admittanceOffsetZ = 0.0;
     private double admittanceVelZ = 0.0;
@@ -352,10 +353,6 @@
         public double RgbdY { get; init; }
         public double RgbdZ { get; init; }
         public double RgbdYaw { get; init; }
-        public double GtX { get; init; }
-        public double GtY { get; init; }
-        public double GtZ { get; init; }
-        public double GtYaw { get; init; }
         public double LaserDist { get; init; }
         public bool IsBeamBroken { get; init; }
         public double PressureL { get; init; }
@@ -367,6 +364,7 @@
         public double Enc5 { get; init; }
         public double Enc6 { get; init; }
         public double OverlapRatio { get; init; }
+        public double BeltSpeed { get; init; }
     }
 
     private readonly struct SecsLog
@@ -408,9 +406,13 @@
 
     private void LogSecs(string text, string style = "eq")
     {
-        secsLogs.Add(new SecsLog($"[{DateTime.Now:HH:mm:ss}] {text}", style));
-        if (secsLogs.Count > 400) secsLogs.RemoveAt(0);
-        _ = InvokeAsync(StateHasChanged);
+        string line = $"[{DateTime.Now:HH:mm:ss}] {text}";
+        _ = InvokeAsync(() =>
+        {
+            secsLogs.Add(new SecsLog(line, style));
+            if (secsLogs.Count > 400) secsLogs.RemoveAt(0);
+            StateHasChanged();
+        });
     }
 
     private static double ApplyKinematicSpeedGuard(double current, double target, double maxStep)
@@ -428,15 +430,14 @@
 
         try
         {
-            isResetting = true; 
+            isResetting = true;
             activeScenario = scenarioId;
 
-            secsLogs.Clear(); 
+            secsLogs.Clear();
 
             isTransferDone = false;
             isGrasped = false;
             isExecutingTask = false;
-            isWaitingForStagingRecovery = false;
             xRailPos = 0.0;
 
             adaptiveL_TCP = L_TCP_NOMINAL;
@@ -461,66 +462,49 @@
             encJ1 = FAB_HOME_J1; encJ2 = FAB_HOME_J2; encJ3 = FAB_HOME_J3;
             encJ4 = FAB_HOME_J4; encJ5 = FAB_HOME_J5; encJ6 = FAB_HOME_J6;
 
-            plannerStatus = "IDLE";
-            gemControlState = "REMOTE / ONLINE";
+            plannerStatus = "STANDBY";
+            gemControlState = "REMOTE";
             boxPhysicsStatus = "Grounded";
             overlapRatio = 1.0;
             overlapStatus = "SAFE";
 
+            _kfInit = false; _partSerial = 0; _handledSerial = 0;
+            _pauseReq = false; _stopReq = false;
+            cellState = CellState.Idle;
+
             await ClearE84Signals();
             await JSRuntime.InvokeVoidAsync("ros2SwitchScenario", scenarioId);
-            
-            LogSecs($"S6F11: CEID 1000 (Scenario_Switched_To_{scenarioId})", "eq");
-            diagnosticMessage = $"已切換至情境 {scenarioId}: {activeScenarioName}，深層重置所有感測、自適應與控制參數...";
+
+            LogSecs($"S6F11 CEID=1000 (Equipment_Constant_Changed)", "eq");
+            diagnosticMessage = $"Scenario switched to {activeScenarioName}. Parameters reset.";
 
             await RandomizeScene();
 
             if (scenarioId == 3)
             {
-                _ = Task.Run(() => RunScenario3AutoLoop(_cts.Token));
+                LogSecs("Scenario 3 Ready. Awaiting S2F41 START.", "host");
             }
         }
         finally
         {
-            isResetting = false; 
+            isResetting = false;
             await InvokeAsync(StateHasChanged);
         }
     }
 
     private void LogDetailedFailureDiagnostics(string failureStage)
     {
-        double calculatedWorldYaw = encJ1 - encJ6; 
+        double calculatedWorldYaw = encJ1 - encJ6;
         double deltaX = fkTcpX - estX;
         double deltaY = fkTcpY - estY;
         double deltaZ = fkTcpZ - estZ;
         double yawError = calculatedWorldYaw - estYaw;
 
-        LogSecs($"🚨 [DIAGNOSTIC-FAIL] Stage: {failureStage}", "alarm");
-        LogSecs($"📍 [GT vs EKF vs FK 殘差] GT:({gtX:F3},{gtY:F3},{gtZ:F3}) | EKF:({estX:F3},{estY:F3},{estZ:F3}) | FK_TCP:({fkTcpX:F3},{fkTcpY:F3},{fkTcpZ:F3}) | ΔX:{deltaX:F3}m ΔY:{deltaY:F3}m ΔZ:{deltaZ:F3}m", "alarm");
-        LogSecs($"🔄 [姿態殘差] Enc_J1:{encJ1:F1}° J6:{encJ6:F1}° (WorldYaw:{calculatedWorldYaw:F1}°) vs EKF_Yaw:{estYaw:F1}° (GT_Yaw:{gtYaw:F1}°) | Err:{yawError:F1}°", "alarm");
-        LogSecs($"📡 [感測器狀態] LaserToF:{tofLaserDist:F3}m | IR_Beam:{(isPhotoelectricBroken ? "BROKEN" : "CLEAR")} | Press(L/R):{pressureLeft:F1}/{pressureRight:F1} kPa", "alarm");
-        LogSecs($"📊 [指標參數] Overlap:{overlapRatio:P1} (Threshold:65.0%) | Torque:{tippingTorque:F3}Nm | L_TCP_Est:{adaptiveL_TCP:F4}m GroundZ_Est:{adaptiveGroundZ:F4}m", "alarm");
-    }
-
-    private void LogPhaseTruthComparison(string phaseTag)
-    {
-        double calculatedWorldYaw = encJ1 - encJ6; 
-        double errX = fkTcpX - estX;
-        double errY = fkTcpY - estY;
-        double errZ = fkTcpZ - estZ;
-        
-        double yawErrRad = (calculatedWorldYaw - estYaw) * Math.PI / 180.0;
-        double yawErrNormalized = Math.Atan2(Math.Sin(yawErrRad), Math.Cos(yawErrRad)) * 180.0 / Math.PI;
-        yawErrNormalized %= 90.0;
-        if (yawErrNormalized > 45.0) yawErrNormalized -= 90.0;
-        if (yawErrNormalized < -45.0) yawErrNormalized += 90.0;
-
-        LogSecs($"🔍 [{phaseTag}] --- GT 真值 vs 視覺 EKF vs FK TCP 診斷 ---", "host");
-        LogSecs($"🎯 [GT 物理真值 (Cheat)] XYZ:({gtX:F3},{gtY:F3},{gtZ:F3}) | Yaw:{gtYaw:F1}°", "eq");
-        LogSecs($"📷 [RGBD 感測 EKF 估算] XYZ:({estX:F3},{estY:F3},{estZ:F3}) | Yaw:{estYaw:F1}°", "eq");
-        LogSecs($"📐 [FK 運動推算 TCP] XYZ:({fkTcpX:F3},{fkTcpY:F3},{fkTcpZ:F3}) | ΔFK-EKF:(ΔX:{errX:F3}, ΔY:{errY:F3}, ΔZ:{errZ:F3})m | ΔFK-GT:Y={fkTcpY - gtY:F3}m", "eq");
-        LogSecs($"🔄 [關節編碼器與角速度] Enc_J1~J6:({encJ1:F1}°,{encJ2:F1}°,{encJ3:F1}°,{encJ4:F1}°,{encJ5:F1}°,{encJ6:F1}°) | Vel_w1~w6:({w1:F1},{w2:F1},{w3:F1},{w4:F1},{w5:F1},{w6:F1})°/s", "eq");
-        LogSecs($"📊 [感測指標] Overlap:{overlapRatio:P1} | LaserToF:{tofLaserDist:F3}m | Beam:{(isPhotoelectricBroken ? "BROKEN" : "CLEAR")} | Press:{pressureLeft:F1}kPa", "eq");
+        LogSecs($"[ALARM] Sequence Failed at: {failureStage}", "alarm");
+        LogSecs($"[DIAG] EKF:({estX:F3},{estY:F3},{estZ:F3}) | FK_TCP:({fkTcpX:F3},{fkTcpY:F3},{fkTcpZ:F3}) | dXYZ:({deltaX:F3},{deltaY:F3},{deltaZ:F3})", "alarm");
+        LogSecs($"[DIAG] Enc_J1:{encJ1:F1} J6:{encJ6:F1} | EKF_Yaw:{estYaw:F1} | Err:{yawError:F1}", "alarm");
+        LogSecs($"[DIAG] LaserToF:{tofLaserDist:F3}m | Beam:{(isPhotoelectricBroken ? "BROKEN" : "CLEAR")} | Press:{pressureLeft:F1}/{pressureRight:F1} kPa", "alarm");
+        LogSecs($"[DIAG] Overlap:{overlapRatio:P1} | Torque:{tippingTorque:F3}Nm | L_TCP_Est:{adaptiveL_TCP:F4}m", "alarm");
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -562,6 +546,16 @@
                 window.ros2SwitchScenario = function(mode) {
                     if (window.ros2RobotSim) window.ros2RobotSim.switchScenarioMode(mode);
                 };
+                window.ros2Dispose = function() {
+                    var sim = window.ros2RobotSim;
+                    if (!sim) return;
+                    sim._disposed = true;
+                    if (sim._raf) cancelAnimationFrame(sim._raf);
+                    sim.dotNetRef = null;
+                    if (sim.renderer) { sim.renderer.dispose(); }
+                    if (sim.rgbdRenderer) { sim.rgbdRenderer.dispose(); }
+                    window.ros2RobotSim = null;
+                };
 
                 window.initRobotSim = async function(containerId, dotNetRef) {
                     await window.loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
@@ -569,18 +563,18 @@
                     window.ros2RobotSim = {
                         scene: null, camera: null, renderer: null,
                         rgbdCamera: null, rgbdRenderer: null,
-                        robotBaseGroup: null, 
+                        robotBaseGroup: null,
                         j1Group: null, j2Group: null, j3Group: null, j4Group: null, j5Group: null,
                         leftFinger: null, rightFinger: null,
                         targetBox: null, mainTargetBox: null, eeBase: null,
                         irBeamMesh: null, laserBeamMesh: null, photoelectricMesh: null, entryBeamMesh: null,
-                        
+
                         scenario1Group: null,
                         scenario2Group: null,
                         scenario3Group: null,
-                        
+
                         conveyorItems: [],
-                        conveyorBaseSpeed: 0.12, 
+                        conveyorBaseSpeed: 0.12,
                         conveyorSpeedA: 0.12,
                         spawnTimer: 0,
                         beltJitterTime: 0,
@@ -588,6 +582,9 @@
                         pLeftBias: 0.15,
                         pRightBias: 0.18,
                         lastPublishTime: 0,
+                        _lastConvT: 0,
+                        _raf: 0,
+                        _disposed: false,
 
                         isAttached: false,
                         boxVelocityY: 0.0,
@@ -669,7 +666,8 @@
                             });
 
                             const animate = () => {
-                                requestAnimationFrame(animate);
+                                if (this._disposed) return;
+                                this._raf = requestAnimationFrame(animate);
                                 try {
                                     this.updateConveyorPhysics();
                                     this.updateWorldE84IRBeam();
@@ -678,9 +676,8 @@
                                     this.enforceAbsoluteWorldFloorClamp();
                                     this.checkGraspPhysics();
                                     this.publishSensorStreamPacket();
-                                    this.updateMouseWorldCoords(); 
-                                } catch(e) {
-                                }
+                                    this.updateMouseWorldCoords();
+                                } catch(e) {}
                                 this.renderer.render(this.scene, this.camera);
 
                                 if (this.rgbdRenderer && this.rgbdCamera) {
@@ -692,19 +689,19 @@
 
                         updateMouseWorldCoords: function() {
                             const now = performance.now();
-                            if (now - this.lastMouseRaycastTime < 33) return; 
+                            if (now - this.lastMouseRaycastTime < 33) return;
                             this.lastMouseRaycastTime = now;
 
                             if (!this.camera || !this.mouseRaycaster) return;
 
                             this.mouseRaycaster.setFromCamera(this.mouseVec, this.camera);
-                            
+
                             const intersects = this.mouseRaycaster.intersectObjects(this.scene.children, true);
-                            
-                            const hit = intersects.find(i => 
-                                i.object.visible && 
-                                i.object.type === 'Mesh' && 
-                                i.object !== this.laserBeamMesh && 
+
+                            const hit = intersects.find(i =>
+                                i.object.visible &&
+                                i.object.type === 'Mesh' &&
+                                i.object !== this.laserBeamMesh &&
                                 i.object !== this.irBeamMesh &&
                                 i.object !== this.photoelectricMesh &&
                                 i.object !== this.entryBeamMesh
@@ -714,13 +711,13 @@
                             if (!elem) return;
 
                             if (hit) {
-                                elem.innerText = `🖱️ ROS2 World (Z-Up): (X: ${hit.point.x.toFixed(3)}, Y: ${hit.point.z.toFixed(3)}, Z: ${hit.point.y.toFixed(3)})m`;
+                                elem.innerText = `World Coordinates (Z-Up): (X: ${hit.point.x.toFixed(3)}, Y: ${hit.point.z.toFixed(3)}, Z: ${hit.point.y.toFixed(3)})m`;
                                 elem.style.color = '#00ffcc';
                             } else {
                                 const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
                                 const intersectPoint = new THREE.Vector3();
                                 if (this.mouseRaycaster.ray.intersectPlane(groundPlane, intersectPoint)) {
-                                    elem.innerText = `🖱️ ROS2 World (Z-Up): (X: ${intersectPoint.x.toFixed(3)}, Y: ${intersectPoint.z.toFixed(3)}, Z: ${intersectPoint.y.toFixed(3)})m`;
+                                    elem.innerText = `World Coordinates (Z-Up): (X: ${intersectPoint.x.toFixed(3)}, Y: ${intersectPoint.z.toFixed(3)}, Z: ${intersectPoint.y.toFixed(3)})m`;
                                     elem.style.color = '#888888';
                                 }
                             }
@@ -750,7 +747,7 @@
                             }
 
                             if (mode !== 2 && this.robotBaseGroup) {
-                                this.robotBaseGroup.position.x = 0; 
+                                this.robotBaseGroup.position.x = 0;
                             }
 
                             if (this.scenario1Group) this.scenario1Group.visible = (mode === 1);
@@ -774,17 +771,17 @@
                         },
 
                         spawnConveyorItem: function(startZ = -0.50) {
-                            const sizeJitter = 0.12 + (Math.random() - 0.5) * 0.003; 
+                            const sizeJitter = 0.12 + (Math.random() - 0.5) * 0.003;
                             const boxGeo = new THREE.BoxGeometry(sizeJitter, sizeJitter, sizeJitter);
                             const boxMat = new THREE.MeshStandardMaterial({ color: 0xef233c, roughness: 0.3 });
                             const item = new THREE.Mesh(boxGeo, boxMat);
-                            
+
                             const landingTilt = (Math.random() - 0.5) * (1.8 * Math.PI / 180.0);
-                            item.position.set(-0.75, 0.14, startZ); 
+                            item.position.set(-0.75, 0.14, startZ);
                             item.rotation.set(0, landingTilt, 0);
                             item.beltState = 'A';
                             item.castShadow = true;
-                            
+
                             this.scene.add(item);
                             this.conveyorItems.push(item);
                             if (!this.isAttached && !this.targetBox) {
@@ -821,12 +818,12 @@
 
                             const beltAGeo = new THREE.BoxGeometry(0.35, 0.08, 2.5);
                             const beltA = new THREE.Mesh(beltAGeo, beltMat);
-                            beltA.position.set(-0.75, 0.04, 0.70); 
+                            beltA.position.set(-0.75, 0.04, 0.70);
                             this.scenario3Group.add(beltA);
 
                             const beltBGeo = new THREE.BoxGeometry(2.5, 0.08, 0.35);
                             const beltB = new THREE.Mesh(beltBGeo, beltMat);
-                            beltB.position.set(0.70, 0.04, 0.75); 
+                            beltB.position.set(0.70, 0.04, 0.75);
                             this.scenario3Group.add(beltB);
 
                             const gateLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.35, 16), postMat);
@@ -856,17 +853,21 @@
                         },
 
                         updateConveyorPhysics: function() {
+                            const nowT = performance.now();
+                            const dt = Math.min(0.05, (nowT - (this._lastConvT || nowT)) / 1000.0);
+                            this._lastConvT = nowT;
+
                             if (this.activeScenarioMode !== 3) return;
 
-                            this.spawnTimer += 0.016;
-                            this.beltJitterTime += 0.016;
+                            this.spawnTimer += dt;
+                            this.beltJitterTime += dt;
 
                             const speedJitter = 1.0 + 0.04 * Math.sin(2.0 * Math.PI * 1.5 * this.beltJitterTime) + (Math.random() - 0.5) * 0.01;
                             this.conveyorSpeedA = this.conveyorBaseSpeed * speedJitter;
 
                             let lastItem = this.conveyorItems[this.conveyorItems.length - 1];
-                            let minPitchMet = !lastItem || (lastItem.position.z > 0.40); 
-                            let targetSpawnInterval = 6.8 + (Math.random() - 0.5) * 0.4; 
+                            let minPitchMet = !lastItem || (lastItem.position.z > 0.40);
+                            let targetSpawnInterval = 6.8 + (Math.random() - 0.5) * 0.4;
 
                             if (this.spawnTimer >= targetSpawnInterval && minPitchMet && this.conveyorItems.length < 5) {
                                 this.spawnTimer = 0;
@@ -885,7 +886,7 @@
                                 if (item === this.targetBox && this.isAttached) continue;
 
                                 if (item.beltState === 'A') {
-                                    item.position.z += this.conveyorSpeedA * 0.016;
+                                    item.position.z += this.conveyorSpeedA * dt;
                                     if (item.position.z > 1.8) {
                                         this.scene.remove(item);
                                         if (item.geometry) item.geometry.dispose();
@@ -894,7 +895,7 @@
                                         if (this.targetBox === item) this.targetBox = null;
                                     }
                                 } else if (item.beltState === 'B') {
-                                    item.position.x += this.conveyorSpeedA * 0.016;
+                                    item.position.x += this.conveyorSpeedA * dt;
                                     if (item.position.x > 1.8) {
                                         this.scene.remove(item);
                                         if (item.geometry) item.geometry.dispose();
@@ -909,10 +910,10 @@
                             }
 
                             if (!this.isAttached) {
-                                let isTargetValid = this.targetBox && 
-                                                    this.targetBox.parent === this.scene && 
-                                                    this.targetBox.beltState === 'A' && 
-                                                    this.targetBox.position.z >= -0.65 && 
+                                let isTargetValid = this.targetBox &&
+                                                    this.targetBox.parent === this.scene &&
+                                                    this.targetBox.beltState === 'A' &&
+                                                    this.targetBox.position.z >= -0.65 &&
                                                     this.targetBox.position.z <= 1.20;
                                 if (!isTargetValid) {
                                     let closest = null;
@@ -1033,7 +1034,6 @@
                             eyeCamera.position.set(0, 0, 0.05);
                             this.eeBase.add(eyeCamera);
 
-                            // 📷 手眼相機 PerspectiveCamera (512x512)
                             this.rgbdCamera = new THREE.PerspectiveCamera(60, 1.0, 0.05, 10);
                             this.rgbdCamera.position.set(0, 0.08, 0.05);
                             this.rgbdCamera.lookAt(0, 0, 0.25);
@@ -1126,31 +1126,31 @@
                                 this.isAttached = true;
                                 this.eeBase.attach(this.targetBox);
                                 this.targetBox.material.color.setHex(0x28a745);
-                                this.dotNetRef.invokeMethodAsync('OnGraspChanged', true);
+                                if (this.dotNetRef) this.dotNetRef.invokeMethodAsync('OnGraspChanged', true);
                             } else if (!attach && this.isAttached) {
                                 this.isAttached = false;
-                                this.scene.attach(this.targetBox); 
-                                
+                                this.scene.attach(this.targetBox);
+
                                 const currentYaw = this.targetBox.rotation.y;
                                 this.targetBox.rotation.set(0, currentYaw, 0);
-                                
+
                                 let floorY = (this.activeScenarioMode === 3) ? 0.14 : 0.06;
-                                this.targetBox.position.y = floorY; 
+                                this.targetBox.position.y = floorY;
                                 this.boxVelocityY = 0.0;
 
                                 if (this.activeScenarioMode === 3) {
-                                    this.targetBox.beltState = 'B';
+                                    this.targetBox.beltState = isDone ? 'B' : 'A';
                                 }
 
-                                this.attachCooldown = 120; 
+                                this.attachCooldown = isDone ? 120 : 20;
 
                                 if (isDone) {
                                     this.targetBox.material.color.setHex(0x007acc);
                                 } else {
                                     this.targetBox.material.color.setHex(0xef233c);
                                 }
-                                
-                                this.dotNetRef.invokeMethodAsync('OnGraspChanged', false);
+
+                                if (this.dotNetRef) this.dotNetRef.invokeMethodAsync('OnGraspChanged', false);
                             }
                         },
 
@@ -1160,7 +1160,7 @@
                             this.targetBox = new THREE.Mesh(boxGeo, boxMat);
                             this.targetBox.position.set(0.25, 0.06, 0.75);
                             this.targetBox.castShadow = true;
-                            this.mainTargetBox = this.targetBox; 
+                            this.mainTargetBox = this.targetBox;
                             this.scene.add(this.targetBox);
                         },
 
@@ -1199,7 +1199,6 @@
                             this.targetBox.material.color.setHex(0xef233c);
                             this.boxVelocityY = 0;
 
-                            // 座標映射: Three.js (x, y, z) = ROS2 Z-Up (x, z, y)
                             this.targetBox.position.set(xRos, zRos, yRos);
                             this.targetBox.rotation.set(
                                 rxDeg * (Math.PI / 180.0),
@@ -1213,9 +1212,10 @@
                         publishSensorStreamPacket: function () {
                             const now = performance.now();
                             if (!this.lastPublishTime) this.lastPublishTime = now;
-                            if (now - this.lastPublishTime < 33.0) return; // 30FPS 相機限流
+                            if (now - this.lastPublishTime < 33.0) return; 
                             this.lastPublishTime = now;
 
+                            if (!this.dotNetRef) return;
                             if (!this.leftFinger || !this.rightFinger || !this.targetBox || !this.targetBox.parent || !this.eeBase) return;
 
                             this.scene.updateMatrixWorld(true);
@@ -1237,7 +1237,7 @@
 
                             const fingerWorldDir = new THREE.Vector3(1, 0, 0).applyQuaternion(this.eeBase.getWorldQuaternion(new THREE.Quaternion()));
                             const eeWorldYaw = Math.atan2(fingerWorldDir.z, fingerWorldDir.x);
-                            
+
                             const boxWorldQuat = new THREE.Quaternion();
                             this.targetBox.getWorldQuaternion(boxWorldQuat);
                             const boxWorldEuler = new THREE.Euler().setFromQuaternion(boxWorldQuat, 'YXZ');
@@ -1264,7 +1264,7 @@
                             let noiseZ = ((Math.random() - 0.5) * depthNoiseCoeff) + subPixelJitter;
 
                             if (Math.random() < 0.015) {
-                                noiseZ += (Math.random() - 0.5) * 0.07; 
+                                noiseZ += (Math.random() - 0.5) * 0.07;
                             }
 
                             const noiseYaw = (Math.random() - 0.5) * 0.8;
@@ -1281,7 +1281,7 @@
                             let pressureThreshY = this.targetBox ? (this.targetBox.position.y + 0.002) : 0.062;
 
                             if (this.isAttached) {
-                                pL = 12.4 + (Math.random() - 0.5) * 0.25; 
+                                pL = 12.4 + (Math.random() - 0.5) * 0.25;
                                 pR = 12.6 + (Math.random() - 0.5) * 0.25;
                             } else if (tcpCenter.y <= pressureThreshY && horizontalDist < 0.06) {
                                 const penetDepth = Math.max(0, pressureThreshY - tcpCenter.y);
@@ -1298,10 +1298,6 @@
                                 RgbdY: boxPos.z + noiseZ,
                                 RgbdZ: boxPos.y + noiseY,
                                 RgbdYaw: (boxYaw * (180.0 / Math.PI)) + noiseYaw,
-                                GtX: boxPos.x,
-                                GtY: boxPos.z,
-                                GtZ: boxPos.y,
-                                GtYaw: boxYaw * (180.0 / Math.PI),
                                 LaserDist: laserDist,
                                 IsBeamBroken: isBeamBroken,
                                 PressureL: pL,
@@ -1312,7 +1308,8 @@
                                 Enc4: this.j4Group ? this.j4Group.rotation.x * (180 / Math.PI) : 0,
                                 Enc5: this.j5Group ? this.j5Group.rotation.x * (180 / Math.PI) : 0,
                                 Enc6: this.eeBase ? this.eeBase.rotation.z * (180 / Math.PI) : 0,
-                                OverlapRatio: overlapPercent
+                                OverlapRatio: overlapPercent,
+                                BeltSpeed: this.activeScenarioMode === 3 ? this.conveyorSpeedA : 0.0
                             };
 
                             this.dotNetRef.invokeMethodAsync('OnSensorStreamUpdate', packet);
@@ -1328,7 +1325,7 @@
                             if (this.j5Group) this.j5Group.rotation.x = j5 * (Math.PI / 180);
 
                             if (this.eeBase) {
-                                this.eeBase.position.set(0, 0, 0.03); 
+                                this.eeBase.position.set(0, 0, 0.03);
                                 this.eeBase.rotation.z = j6 * (Math.PI / 180);
                             }
 
@@ -1367,7 +1364,7 @@
                                 this.isAttached = true;
                                 this.eeBase.attach(this.targetBox);
                                 this.targetBox.material.color.setHex(0x28a745);
-                                this.dotNetRef.invokeMethodAsync('OnGraspChanged', true);
+                                if (this.dotNetRef) this.dotNetRef.invokeMethodAsync('OnGraspChanged', true);
                             }
                         }
                     };
@@ -1377,7 +1374,7 @@
             ");
 
             await JSRuntime.InvokeVoidAsync("window.initRobotSim", "ros2-canvas", objRef);
-            
+
             LogSecs("HSMS Connection Est: Controller Engine Ready", "host");
             LogSecs("S1F13: Communications Request (CR)", "host");
             LogSecs("S1F14: Communications Acknowledge (COMMACK=0)", "eq");
@@ -1390,7 +1387,7 @@
     [JSInvokable]
     public async Task OnSensorStreamUpdate(SensorBusPacket packet)
     {
-        if (isResetting) return; 
+        if (isResetting) return;
 
         try
         {
@@ -1398,7 +1395,7 @@
                 double.IsNaN(packet.Enc1) || double.IsNaN(packet.Enc2) || double.IsNaN(packet.Enc3) ||
                 double.IsNaN(packet.Enc4) || double.IsNaN(packet.Enc5) || double.IsNaN(packet.Enc6))
             {
-                return; 
+                return;
             }
 
             encJ1 = packet.Enc1; encJ2 = packet.Enc2; encJ3 = packet.Enc3;
@@ -1410,7 +1407,33 @@
             boxRotY = ekfYaw.Update(packet.RgbdYaw);
 
             estX = realX; estY = realY; estZ = realZ; estYaw = boxRotY;
-            gtX = packet.GtX; gtY = packet.GtY; gtZ = packet.GtZ; gtYaw = packet.GtYaw;
+
+            if (activeScenario == 3 && Math.Abs(packet.RgbdX + 0.75) < 0.20)
+            {
+                double nowS = NowS;
+                double gap = nowS - _kfLastT;
+                bool newTarget = !_kfInit || gap > 0.5;
+                if (!newTarget)
+                {
+                    _kfY.Predict(Math.Clamp(gap, 0.001, 0.2));
+                    if (Math.Abs(packet.RgbdY - _kfY.Position) > 0.15) newTarget = true;
+                }
+
+                if (newTarget)
+                {
+                    _kfY.Reset(packet.RgbdY, packet.BeltSpeed > 0.01 ? packet.BeltSpeed : cfg.BeltASpeedNominal);
+                    _kfInit = true; _kfRejects = 0; _partSerial++;
+                }
+                else
+                {
+                    double innov = packet.RgbdY - _kfY.Position;
+                    if (Math.Abs(innov) > 0.025 && _kfRejects < 4) _kfRejects++;
+                    else { _kfRejects = 0; _kfY.UpdatePosition(packet.RgbdY, 2.5e-5); }
+                    if (packet.BeltSpeed > 0.01) _kfY.UpdateVelocity(packet.BeltSpeed, 1e-4);
+                }
+                _kfLastT = nowS; _lastPacketS = nowS;
+                estY = _kfY.Position; realY = estY;
+            }
 
             tofLaserDist = packet.LaserDist;
             isPhotoelectricBroken = packet.IsBeamBroken;
@@ -1452,14 +1475,14 @@
             else
             {
                 admittanceVelZ *= 0.85;
-                admittanceVelZ *= 0.85;
+                admittanceOffsetZ *= 0.85;
             }
 
             overlapRatio = packet.OverlapRatio;
 
             if (overlapRatio < MIN_OVERLAP_RATIO_LIMIT)
             {
-                overlapStatus = "⚠️ EDGE_RISK";
+                overlapStatus = "EDGE_RISK";
             }
             else
             {
@@ -1482,7 +1505,7 @@
         double r3 = j3Angle * Math.PI / 180.0;
 
         double horizontalR = L1 * Math.Cos(r2) + L2 * Math.Cos(r2 + r3);
-        fkTcpX = xRailPos + (horizontalR * Math.Sin(r1)); 
+        fkTcpX = xRailPos + (horizontalR * Math.Sin(r1));
         fkTcpY = horizontalR * Math.Cos(r1);
         fkTcpZ = SHOULDER_Z - L1 * Math.Sin(r2) - L2 * Math.Sin(r2 + r3) - adaptiveL_TCP;
     }
@@ -1492,7 +1515,7 @@
         if (double.IsNaN(targetJ1) || double.IsNaN(targetJ2) || double.IsNaN(targetJ3) ||
             double.IsNaN(targetJ4) || double.IsNaN(targetJ5) || double.IsNaN(targetJ6))
         {
-            return; 
+            return;
         }
 
         if (double.IsNaN(j1Angle) || double.IsNaN(j2Angle) || double.IsNaN(j3Angle) ||
@@ -1526,21 +1549,21 @@
 
         double gJ2 = (M1 * 0.4 + M2 * L1) * GRAVITY * Math.Cos(r2) + (M3 + M_EE + activePayloadMass) * GRAVITY * (L1 + L2) * Math.Cos(r2 + r3);
         double gJ3 = (M3 * 0.3 + M_EE + activePayloadMass) * GRAVITY * L2 * Math.Cos(r2 + r3);
-        
+
         tauCoriolis = (M2 + M3 + M_EE) * (L1 + L2) * (w1 * w1) * Math.Sin(r2) * Math.Cos(r2);
         tauJ2 = gJ2 + tauCoriolis;
-        tauJ3 = gJ3; 
-        tauJ1 = M1 * 0.1 * Math.Abs(w1); 
+        tauJ3 = gJ3;
+        tauJ1 = M1 * 0.1 * Math.Abs(w1);
 
         if (gripperDist <= SOLID_GRIP_LIMIT)
         {
             normalForce = NORMAL_FORCE_SOLID;
             frictionForce = 2.0 * FRICTION_MU * normalForce;
-            
+
             double eccentricDistance = (1.0 - overlapRatio) * 0.12;
             tippingTorque = M_BOX * GRAVITY * eccentricDistance;
 
-            boxPhysicsStatus = isGrasped ? "Grasped Attached" : "Slipping";
+            boxPhysicsStatus = isGrasped ? "Attached" : "Slipping";
         }
         else
         {
@@ -1550,7 +1573,7 @@
 
         double kp = isLiftingMode ? 55.0 : (isPrecisionZone ? 70.0 : (isGrasped ? 45.0 : 35.0));
         double kd = isLiftingMode ? 22.0 : (isPrecisionZone ? 24.0 : (isGrasped ? 18.0 : 16.0));
-        double velDampingFactor = 0.90; 
+        double velDampingFactor = 0.90;
 
         double errJ1 = targetJ1 - j1Angle;
         double errJ2 = targetJ2 - j2Angle;
@@ -1594,7 +1617,7 @@
         double tau3 = tau * tau * tau;
         double tau4 = tau3 * tau;
         double tau5 = tau4 * tau;
-        
+
         double u = 10.0 * tau3 - 15.0 * tau4 + 6.0 * tau5;
 
         double currentD = u * totalDist;
@@ -1656,7 +1679,7 @@
             maxTimeReq += segTime;
         }
 
-        int steps = Math.Clamp((int)(maxTimeReq / 0.01), 60, 400); 
+        int steps = Math.Clamp((int)(maxTimeReq / 0.01), 60, 400);
 
         for (int s = 0; s <= steps; s++)
         {
@@ -1669,7 +1692,7 @@
             gripperDist = target.Grip;
 
             await SyncToSim();
-            await Task.Delay(10, ct); 
+            await Task.Delay(10, ct);
         }
     }
 
@@ -1681,14 +1704,14 @@
             steps = Math.Clamp((int)(dist * 500.0), 60, 200);
         }
 
-        LogSecs($"[Command] MoveLinearTaskSpace | Start:({startX:F3},{startY:F3},{startZ:F3}) -> End:({endX:F3},{endY:F3},{endZ:F3})", "host");
+        LogSecs($"[MOTION] Linear Task Space: ({startX:F3},{startY:F3},{startZ:F3}) -> ({endX:F3},{endY:F3},{endZ:F3})", "host");
 
         for (int i = 1; i <= steps; i++)
         {
             if (ct.IsCancellationRequested) return;
 
             double t = (double)i / steps;
-            double smoothT = t * t * (3.0 - 2.0 * t); 
+            double smoothT = t * t * (3.0 - 2.0 * t);
 
             double currX = startX + (endX - startX) * smoothT;
             double currY = startY + (endY - startY) * smoothT;
@@ -1698,7 +1721,7 @@
             {
                 StepFullMultibodyDynamics(ikJ1, ikJ2, ikJ3, ikJ4, ikJ5, ikJ6, isPrecisionZone: true, dt: 0.01);
                 await SyncToSim();
-                await Task.Delay(10, ct); 
+                await Task.Delay(10, ct);
             }
         }
     }
@@ -1709,7 +1732,7 @@
         double dist = Math.Abs(targetRailX - startRail);
         if (steps <= 0)
         {
-            double travelTime = Math.Max(0.8, dist / 0.35); 
+            double travelTime = Math.Max(0.8, dist / 0.35);
             steps = (int)(travelTime / 0.01);
         }
 
@@ -1718,33 +1741,11 @@
             if (ct.IsCancellationRequested) return;
             double t = (double)i / steps;
             double smoothT = t * t * (3.0 - 2.0 * t);
-            
+
             xRailPos = startRail + (targetRailX - startRail) * smoothT;
             await JSRuntime.InvokeVoidAsync("ros2SetRailX", xRailPos);
-            
+
             ComputeForwardKinematics();
-            await SyncToSim();
-            await Task.Delay(10, ct);
-        }
-    }
-
-    private async Task RapidPinchCloseToSolidLimit(CancellationToken ct = default)
-    {
-        double holdJ1 = j1Angle, holdJ2 = j2Angle, holdJ3 = j3Angle, holdJ4 = j4Angle, holdJ5 = j5Angle, holdJ6 = j6Angle;
-        double startGrip = gripperDist;
-        int pinchSteps = 24;
-
-        for (int s = 1; s <= pinchSteps; s++)
-        {
-            if (ct.IsCancellationRequested) return;
-
-            double t = (double)s / pinchSteps;
-            double smoothT = t * t * (3.0 - 2.0 * t);
-            
-            gripperDist = startGrip + (SOLID_GRIP_LIMIT - startGrip) * smoothT;
-            
-            StepFullMultibodyDynamics(holdJ1, holdJ2, holdJ3, holdJ4, holdJ5, holdJ6, isPrecisionZone: true, dt: 0.01);
-            
             await SyncToSim();
             await Task.Delay(10, ct);
         }
@@ -1762,11 +1763,11 @@
 
             double t = (double)s / openSteps;
             double smoothT = t * t * (3.0 - 2.0 * t);
-            
+
             gripperDist = startGrip + (FAB_HOME_GRIP - startGrip) * smoothT;
-            
+
             StepFullMultibodyDynamics(holdJ1, holdJ2, holdJ3, holdJ4, holdJ5, holdJ6, isPrecisionZone: true, dt: 0.01);
-            
+
             await SyncToSim();
             await Task.Delay(10, ct);
         }
@@ -1786,15 +1787,15 @@
 
         double localX = x - xRailPos;
 
-        outJ1 = Math.Atan2(localX, y) * (180.0 / Math.PI); 
+        outJ1 = Math.Atan2(localX, y) * (180.0 / Math.PI);
         if (double.IsNaN(outJ1)) outJ1 = 0;
 
         double wristX = localX;
         double wristY = y;
-        double wristZ = z + adaptiveL_TCP + admittanceOffsetZ; 
+        double wristZ = z + adaptiveL_TCP + admittanceOffsetZ;
 
         double wristR = Math.Sqrt(wristX * wristX + wristY * wristY);
-        double h = wristZ - SHOULDER_Z; 
+        double h = wristZ - SHOULDER_Z;
         double d = Math.Sqrt(wristR * wristR + h * h);
 
         if (d > (L1 + L2) || d < Math.Abs(L1 - L2) || d < 0.0001)
@@ -1846,32 +1847,29 @@
         await Task.Delay(jitterMs);
 
         string op = isPlace ? "[Place]" : "[Pick]";
-        e84State = "E84_INIT_VALID";
-        LogSecs($"E84 PI/O: {op} Active Asserting [VALID = ON, CS_0 = ON] (Filter Jitter: {jitterMs}ms)", "host");
+        LogSecs($"E84 PI/O: {op} VALID=ON, CS_0=ON", "host");
         e84Valid = true; e84Cs0 = true;
         await InvokeAsync(StateHasChanged);
-        
+
         for (int k = 0; k < 3; k++) { await Task.Delay(30); }
 
-        e84State = "E84_WAIT_READY";
-        LogSecs($"E84 PI/O: {op} Passive Sensor Asserted [L_REQ = ON, HO_AVBL = ON]", "eq");
+        LogSecs($"E84 PI/O: {op} L_REQ=ON, HO_AVBL=ON", "eq");
         e84LReq = true; e84HoAvbl = true;
         await InvokeAsync(StateHasChanged);
-        
+
         for (int k = 0; k < 3; k++) { await Task.Delay(30); }
 
-        LogSecs($"E84 PI/O: {op} Passive Interlock Released [READY = ON]", "eq");
+        LogSecs($"E84 PI/O: {op} READY=ON", "eq");
         e84Ready = true;
         await InvokeAsync(StateHasChanged);
-        
+
         for (int k = 0; k < 3; k++) { await Task.Delay(30); }
 
-        e84State = "E84_TRANSFER_ACTIVE";
-        LogSecs($"E84 PI/O: {op} Active Initiating [TR_REQ = ON, BUSY = ON]", "host");
-        LogSecs($"🔴 抵達預備位對準：SEMI E84 垂直光學紅外線啟動！", "host");
-        
+        LogSecs($"E84 PI/O: {op} TR_REQ=ON, BUSY=ON", "host");
+        LogSecs($"E84 PI/O: Optical transceiver active", "host");
+
         e84TrReq = true; e84Busy = true;
-        
+
         await SetIRBeamState(true);
     }
 
@@ -1886,8 +1884,6 @@
     {
         e84Valid = false; e84Cs0 = false; e84TrReq = false; e84Busy = false;
         e84Comp = false; e84Ready = false;
-        
-        e84State = "E84_IDLE";
 
         await SetIRBeamState(false);
         await InvokeAsync(StateHasChanged);
@@ -1895,7 +1891,7 @@
 
     private async Task SendHostCmdStartGrasp()
     {
-        if (!await _simLock.WaitAsync(0)) return; 
+        if (!await _simLock.WaitAsync(0)) return;
 
         try
         {
@@ -1903,8 +1899,8 @@
             _cts?.Cancel();
             _cts = new CancellationTokenSource();
 
-            LogSecs($"S2F41: Host Command 'STRESS_TEST' (Job: {currentJobId})", "host");
-            LogSecs("S2F42: Command Acknowledge (HCACK=0)", "eq");
+            LogSecs($"S2F41 Host Command 'TRANSFER_REQ' (Job: {currentJobId})", "host");
+            LogSecs("S2F42 HCACK=0", "eq");
             gemControlState = "EXECUTING";
 
             if (activeScenario == 1)
@@ -1915,18 +1911,14 @@
             {
                 await RunScenario2RailTransfer();
             }
-            else if (activeScenario == 3)
-            {
-                await RunScenario3ConveyorTracking();
-            }
         }
         catch (OperationCanceledException)
         {
-            LogSecs("⚠️ 任務收到取消訊號中斷", "alarm");
+            LogSecs("Task aborted via cancellation token.", "alarm");
         }
         catch (Exception ex)
         {
-            LogSecs($"🚨 任務執行例外安全捕捉: {ex.Message}", "alarm");
+            LogSecs($"Exception caught during execution: {ex.Message}", "alarm");
         }
         finally
         {
@@ -1939,8 +1931,8 @@
     private async Task SendHostCmdRetract()
     {
         _cts?.Cancel();
-        LogSecs("S2F41: Host Command 'RETRACT'", "host");
-        LogSecs("S2F42: Command Acknowledge (HCACK=0)", "eq");
+        LogSecs("S2F41 Host Command 'RETRACT'", "host");
+        LogSecs("S2F42 HCACK=0", "eq");
         await ResetPose();
     }
 
@@ -1955,9 +1947,8 @@
             isGrasped = false;
             isTransferDone = false;
             isExecutingTask = false;
-            plannerStatus = "RANDOMIZED";
+            plannerStatus = "STANDBY";
             overlapRatio = 1.0;
-            overlapStatus = "SAFE";
             await ClearE84Signals();
 
             adaptiveL_TCP = L_TCP_NOMINAL;
@@ -1968,7 +1959,6 @@
 
             w1 = 0; w2 = 0; w3 = 0; w4 = 0; w5 = 0; w6 = 0;
             normalForce = 0.0; frictionForce = 0.0; tippingTorque = 0.0;
-            compOffsetX = 0.0; compOffsetY = 0.0;
 
             double spawnX = 0, spawnY = 0, spawnZ = GROUND_Z;
 
@@ -1991,13 +1981,13 @@
             else if (activeScenario == 3)
             {
                 xRailPos = 0.0;
-                spawnX = -0.75; 
-                spawnY = -0.20; 
-                spawnZ = 0.14; 
+                spawnX = -0.75;
+                spawnY = -0.20;
+                spawnZ = 0.14;
             }
 
-            boxRotX = random.Next(-10, 10); 
-            boxRotY = random.Next(-60, 60); 
+            boxRotX = random.Next(-10, 10);
+            boxRotY = random.Next(-60, 60);
             boxRotZ = random.Next(-10, 10);
 
             await JSRuntime.InvokeVoidAsync("ros2SetRailX", xRailPos);
@@ -2013,7 +2003,7 @@
             if (activeScenario == 1 || activeScenario == 2)
             {
                 j1Angle = random.Next(-120, 120);
-                j2Angle = random.Next(-45, 20); 
+                j2Angle = random.Next(-45, 20);
                 j3Angle = random.Next(10, 65);
                 j4Angle = random.Next(-45, 45);
                 j5Angle = random.Next(-30, 30);
@@ -2030,32 +2020,32 @@
             }
             gripperDist = FAB_HOME_GRIP;
 
-            diagnosticMessage = activeScenario == 2 
-                ? $"🎲 情境 2 重置：導軌 X={xRailPos:F2}m，物體估算 X={spawnX:F2}m，全軸隨機化！"
-                : $"🎲 深層重置，情境 {activeScenario} 隨機化完成！";
+            diagnosticMessage = activeScenario == 2
+                ? $"[SYS] Scenario 2 initialized. Rail X={xRailPos:F2}m, Target X={spawnX:F2}m"
+                : $"[SYS] Scenario {activeScenario} initialized.";
 
-            LogSecs($"S6F11: CEID 1000 (Scene_Randomized_Scenario_{activeScenario}_RailX_{xRailPos:F2})", "eq");
+            LogSecs($"S6F11 CEID=1000 (Scene_Initialized)", "eq");
 
             ComputeForwardKinematics();
             await SyncToSim();
         }
         catch (Exception ex)
         {
-            LogSecs($"⚠️ 重置場景異常捕捉: {ex.Message}", "alarm");
+            LogSecs($"[SYS] Exception during initialization: {ex.Message}", "alarm");
         }
         finally
         {
-            isResetting = false; 
+            isResetting = false;
             await InvokeAsync(StateHasChanged);
         }
     }
 
     private async Task RunScenario2RailTransfer()
     {
-        LogSecs("🚊 [情境 2] 發動 7-DOF 滑軌跨站點移載任務...", "host");
-        
+        LogSecs("[MOTION] Initiating multi-station transfer sequence.", "host");
+
         double idealRailX = Math.Clamp(estX, -1.0, 1.0);
-        LogSecs($"🚊 [Step 1] 滑軌 S-Curve 平移至最佳站點位: X={idealRailX:F3}m", "host");
+        LogSecs($"[MOTION] Axis [Rail_X] moving to {idealRailX:F3}m", "host");
         await MoveRailSlideTaskSpace(idealRailX, steps: 0, ct: _cts.Token);
 
         bool graspOk = await ExecuteGraspSequence(compX: 0, compY: 0, ct: _cts.Token);
@@ -2063,13 +2053,13 @@
         if (graspOk)
         {
             double targetStationB_RailX = -0.8;
-            LogSecs($"🚊 [Step 3] 夾持物料，7-DOF 滑軌載運至遠端站點 B (X={targetStationB_RailX:F2}m)...", "host");
+            LogSecs($"[MOTION] Translating to Station B (X={targetStationB_RailX:F2}m)", "host");
             await MoveRailSlideTaskSpace(targetStationB_RailX, steps: 0, ct: _cts.Token);
 
             double placeX = targetStationB_RailX;
             double placeY = 0.70;
-            LogSecs($"🚊 [Step 4] 站點 B 純笛卡兒垂直放座 (X:{placeX:F2}, Y:{placeY:F2}，姿態擺正至 Yaw=0.0°)...", "host");
-            
+            LogSecs($"[MOTION] Executing Cartesian place at Station B.", "host");
+
             await MoveLinearTaskSpace(fkTcpX, fkTcpY, fkTcpZ, placeX, placeY, GROUND_Z + 0.02, 0.0, steps: 0, ct: _cts.Token);
 
             await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", false, true);
@@ -2082,186 +2072,6 @@
         }
     }
 
-    // 🌟 全自動雙輸送帶連鎖追蹤 (CEID 1009 動態可達性修剪 Interlock + 邊緣觸發洗版抑制 + 異常復原重啟)
-    private async Task RunScenario3AutoLoop(CancellationToken ct)
-    {
-        try
-        {
-            LogSecs("🤖 [情境 3] 全自動動態流水線循環啟動 (Endless Auto-Loop Active)...", "host");
-
-            // 預先飛往 Belt A 入口預備佇列 (J1 ≈ -105°)
-            double initStagingX = -0.75;
-            double initStagingY = -0.20 + (0.12 * 0.65);
-            if (SolveIK(initStagingX, initStagingY, 0.28, 0.0, out double initJ1, out double initJ2, out double initJ3, out double initJ4, out double initJ5, out double initJ6))
-            {
-                var initWaypoints = new List<JointState>
-                {
-                    new JointState { J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = j5Angle, J6 = j6Angle, Grip = FAB_HOME_GRIP },
-                    new JointState { J1 = initJ1, J2 = initJ2, J3 = initJ3, J4 = initJ4, J5 = initJ5, J6 = initJ6, Grip = FAB_HOME_GRIP }
-                };
-                LogSecs($"[Command] Multi-Axis CP Arc to Initial Staging | Tgt Y:{initStagingY:F3}m", "host");
-                await MoveAlongSCurvePathWithDynamics(initWaypoints, isPrecision: false, isLifting: false, ct: ct);
-            }
-
-            await SpawnConveyorBox();
-
-            double lastPrunedY = -999.0; 
-
-            while (!ct.IsCancellationRequested && activeScenario == 3)
-            {
-                // 🌟 動態預備點復原保護：如果剛逃逸退回 HOME，主動飛回迎擊點，消滅無限 Prune 循環
-                if (isWaitingForStagingRecovery && !isExecutingTask)
-                {
-                    LogSecs("🚀 [Recovery] 從安全位置主動飛回 Belt A 迎擊準備點...", "host");
-                    if (SolveIK(initStagingX, initStagingY, 0.28, 0.0, out double rJ1, out double rJ2, out double rJ3, out double rJ4, out double rJ5, out double rJ6))
-                    {
-                        var recoveryWaypoints = new List<JointState>
-                        {
-                            new JointState { J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = j5Angle, J6 = j6Angle, Grip = FAB_HOME_GRIP },
-                            new JointState { J1 = j1Angle, J2 = -25.0, J3 = 45.0, J4 = 70.0, J5 = 0, J6 = rJ6, Grip = FAB_HOME_GRIP },
-                            new JointState { J1 = rJ1, J2 = rJ2, J3 = rJ3, J4 = rJ4, J5 = rJ5, J6 = rJ6, Grip = FAB_HOME_GRIP }
-                        };
-                        await MoveAlongSCurvePathWithDynamics(recoveryWaypoints, isPrecision: false, isLifting: false, ct: ct);
-                    }
-                    isWaitingForStagingRecovery = false;
-                    lastPrunedY = -999.0;
-                }
-
-                if (!isGrasped && !isExecutingTask)
-                {
-                    double estFlyTime = 0.8; 
-                    double predictedReachY = estY + (0.12 * estFlyTime);
-                    double maxPickWorkspaceY = 0.350; 
-
-                    if (predictedReachY > maxPickWorkspaceY)
-                    {
-                        if (Math.Abs(estY - lastPrunedY) > 0.25)
-                        {
-                            lastPrunedY = estY;
-                            LogSecs($"S6F11: CEID 1008 (Target_Pruned_Unreachable_Time_Deficit) | EstY:{estY:F3}m -> PredictedReachY:{predictedReachY:F3}m > WorkspaceMax:{maxPickWorkspaceY:F3}m", "alarm");
-                        }
-                        await Task.Delay(250, ct); 
-                    }
-                    else if (estY >= -0.60 && estY <= 0.35 && Math.Abs(estX - (-0.75)) < 0.35)
-                    {
-                        try
-                        {
-                            isExecutingTask = true;
-                            isTransferDone = false;
-                            lastPrunedY = -999.0;
-                            LogSecs($"🎯 [CEID 1007: Upstream Intercept] 門相機 EKF 鎖定上游物料 (GT_Y={gtY:F3}m) | 啟動 3D 斜向預測迎擊", "host");
-                            
-                            bool graspOk = await ExecuteGraspSequence(compX: 0, compY: 0, ct: ct);
-
-                            if (graspOk)
-                            {
-                                double dropX = 0.75; 
-                                double dropY = 0.75;
-                                double dropZ = 0.14; 
-
-                                LogSecs($"🏭 [Step 4] 轉向 CP 軌跡移載至 Belt B (高空姿態擺正至 Yaw=0.0° -> X:{dropX:F2}, Y:{dropY:F2})...", "host");
-                                
-                                SolveIK(dropX, dropY, dropZ + 0.15, 0.0, out double ikJ1, out double ikJ2, out double ikJ3, out double ikJ4, out double ikJ5, out double ikJ6);
-                                LogSecs($"[Kinematics] Belt B Place IK Solved | Tgt J1~J6: ({ikJ1:F1}°,{ikJ2:F1}°,{ikJ3:F1}°,{ikJ4:F1}°,{ikJ5:F1}°,{ikJ6:F1}°)", "host");
-                                
-                                double midJ1 = j1Angle + (ikJ1 - j1Angle) * 0.5;
-                                double arcJ2 = -25.0; 
-                                double arcJ3 = 45.0;  
-                                double arcJ4 = 90.0 - (arcJ2 + arcJ3);
-
-                                var transferWaypoints = new List<JointState>
-                                {
-                                    new JointState { J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = j5Angle, J6 = j6Angle, Grip = gripperDist },
-                                    new JointState { J1 = j1Angle + (ikJ1 - j1Angle)*0.25, J2 = arcJ2, J3 = arcJ3, J4 = arcJ4, J5 = 0, J6 = j6Angle + (ikJ6 - j6Angle)*0.25, Grip = SOLID_GRIP_LIMIT },
-                                    new JointState { J1 = midJ1, J2 = arcJ2, J3 = arcJ3, J4 = arcJ4, J5 = 0, J6 = j6Angle + (ikJ6 - j6Angle)*0.50, Grip = SOLID_GRIP_LIMIT },
-                                    new JointState { J1 = ikJ1, J2 = ikJ2 * 0.8, J3 = ikJ3 * 0.8, J4 = 90.0 - (ikJ2*0.8 + ikJ3*0.8), J5 = 0, J6 = j6Angle + (ikJ6 - ikJ6)*0.85, Grip = SOLID_GRIP_LIMIT },
-                                    new JointState { J1 = ikJ1, J2 = ikJ2, J3 = ikJ3, J4 = ikJ4, J5 = ikJ5, J6 = ikJ6, Grip = SOLID_GRIP_LIMIT }
-                                };
-
-                                await MoveAlongSCurvePathWithDynamics(transferWaypoints, isPrecision: true, isLifting: true, ct: ct);
-
-                                LogSecs("⏳ [INP Wait] 等待高空姿態擺正與馬達動態誤差收斂 (In-Position)...", "host");
-                                for (int k = 0; k < 30; k++)
-                                {
-                                    if (ct.IsCancellationRequested) return;
-                                    StepFullMultibodyDynamics(ikJ1, ikJ2, ikJ3, ikJ4, ikJ5, ikJ6, isPrecisionZone: true, dt: 0.015);
-                                    await SyncToSim();
-                                    await Task.Delay(10, ct);
-                                }
-
-                                LogSecs("📐 [Place Step 2] 純笛卡兒垂直向下放座 (姿態早已擺正，零轉速直下)...", "host");
-                                await MoveLinearTaskSpace(fkTcpX, fkTcpY, fkTcpZ, fkTcpX, fkTcpY, dropZ, 0.0, steps: 0, ct: ct);
-
-                                await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", false, true);
-                                isGrasped = false;
-
-                                await SmoothOpenGripperToHomeLimit(ct: ct);
-
-                                LogSecs("🚀 [SEMI 退刀] 放座完成，發動 J1/J2/J3 順滑同動退刀並直飛動態預備位...", "host");
-                                await ExecuteScenario3FabUnloadToStagingSequence(dropX, dropY, ct: ct);
-
-                                isTransferDone = true;
-                                LogSecs("🎉 [全自動] 情境 3 完成一次標準擺正夾放，手臂已於預備位佇列就緒！", "host");
-                            }
-                            else
-                            {
-                                isGrasped = false;
-                                isWaitingForStagingRecovery = true; // 抓取失敗退回HOME，標記需主動復原
-                            }
-                        }
-                        catch (OperationCanceledException) { break; }
-                        catch (Exception ex)
-                        {
-                            LogSecs($"⚠️ 情境 3 自動試夾單次例外: {ex.Message}", "alarm");
-                            isWaitingForStagingRecovery = true;
-                        }
-                        finally
-                        {
-                            isExecutingTask = false;
-                        }
-                    }
-                }
-
-                await Task.Delay(100, ct); 
-            }
-        }
-        catch (OperationCanceledException) { }
-        catch (Exception ex)
-        {
-            LogSecs($"🚨 情境 3 背景連鎖例外捕捉: {ex.Message}", "alarm");
-        }
-    }
-
-    // 🌟 情境 3 專用退刀規程：放座後抬升同動旋轉 J1/J2/J3 直飛預測迎擊點
-    private async Task ExecuteScenario3FabUnloadToStagingSequence(double placeX, double placeY, CancellationToken ct = default)
-    {
-        admittanceOffsetZ = 0.0;
-        admittanceVelZ = 0.0;
-
-        double flyTimeSecs = 1.2; 
-        double nextStagingX = -0.75;
-        double nextStagingY = -0.30; 
-        
-        if (estY > -0.60 && estY < 0.10) {
-            nextStagingY = estY + (0.12 * flyTimeSecs);
-        }
-
-        SolveIK(nextStagingX, nextStagingY, 0.28, 0.0, out double nStgJ1, out double pStgJ2, out double pStgJ3, out double pStgJ4, out double pStgJ5, out double pStgJ6);
-
-        // 🌟 J1, J2, J3 多軸同時連貫滑動 (Simultaneous Retract Motion)
-        var smoothArcUnloadWaypoints = new List<JointState>
-        {
-            new JointState { J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = j5Angle, J6 = j6Angle, Grip = FAB_HOME_GRIP },
-            new JointState { J1 = j1Angle + (nStgJ1 - j1Angle)*0.4, J2 = -25.0, J3 = 50.0, J4 = 65.0, J5 = 0, J6 = pStgJ6, Grip = FAB_HOME_GRIP },
-            new JointState { J1 = nStgJ1, J2 = pStgJ2, J3 = pStgJ3, J4 = pStgJ4, J5 = pStgJ5, J6 = pStgJ6, Grip = FAB_HOME_GRIP }
-        };
-
-        LogSecs($"[Algorithm] Predict Next Staging | FlyTime: {flyTimeSecs:F1}s | TgtY: {nextStagingY:F3}m", "host");
-        LogSecs($"🚀 [CP Retract Arc] J1/J2/J3 關節同時圓弧動態退刀 | Tgt J1~J6: ({nStgJ1:F1}°,{pStgJ2:F1}°,{pStgJ3:F1}°,{pStgJ4:F1}°,{pStgJ5:F1}°,{pStgJ6:F1}°)", "host");
-        await MoveAlongSCurvePathWithDynamics(smoothArcUnloadWaypoints, isPrecision: false, isLifting: false, ct: ct);
-    }
-
-    // 🌟 情境 1 & 2 標準退刀規程
     private async Task ExecuteFabStandardUnloadSequence(double placeX, double placeY, double currentJ1, double currentJ2, double currentJ3, double currentJ4, double currentJ5, double currentJ6, CancellationToken ct = default)
     {
         admittanceOffsetZ = 0.0;
@@ -2272,56 +2082,18 @@
         double startZ = fkTcpZ;
 
         double liftZ = startZ + 0.18;
-        LogSecs($"[Command] Fab Unload Phase 0: Z-Lift | Start Z:{startZ:F3}m -> End Z:{liftZ:F3}m", "host");
+        LogSecs($"[MOTION] Z-Lift: {startZ:F3}m -> {liftZ:F3}m", "host");
         await MoveLinearTaskSpace(startX, startY, startZ, startX, startY, liftZ, estYaw, steps: 45, ct: ct);
 
         double radJ1 = currentJ1 * (Math.PI / 180.0);
         double exitX = startX - 0.28 * Math.Sin(radJ1);
         double exitY = startY - 0.28 * Math.Cos(radJ1);
 
-        LogSecs($"[Command] Fab Unload Phase 1: Drawback | Tgt XY:({exitX:F3}, {exitY:F3})", "host");
+        LogSecs($"[MOTION] Drawback XY: ({exitX:F3}, {exitY:F3})", "host");
         await MoveLinearTaskSpace(startX, startY, liftZ, exitX, exitY, liftZ, estYaw, steps: 40, ct: ct);
 
-        LogSecs("📐 [Fab 退刀 Phase 2] 安全離腔，手臂平滑縮臂歸位 HOME...", "host");
+        LogSecs("[MOTION] Executing return to HOME.", "host");
         await ExecuteUprisingArchHomeSequence(ct: ct);
-    }
-
-    private async Task RunScenario3ConveyorTracking()
-    {
-        if (!isGrasped && !isExecutingTask)
-        {
-            try
-            {
-                isExecutingTask = true;
-                await ExecuteGraspSequence(compX: 0, compY: 0, ct: _cts.Token);
-            }
-            finally
-            {
-                isExecutingTask = false;
-            }
-        }
-    }
-
-    private async Task SpawnConveyorBox()
-    {
-        try
-        {
-            if (activeScenario == 3)
-            {
-                await JSRuntime.InvokeVoidAsync("ros2SpawnConveyorBox");
-            }
-            else
-            {
-                double spawnX = 0.25, spawnY = 0.75, spawnZ = GROUND_Z;
-                await JSRuntime.InvokeVoidAsync("ros2ResetBoxPose", spawnX, spawnY, spawnZ, 0.0, 0.0, 0.0);
-                ekfX.Reset(spawnX); ekfY.Reset(spawnY); ekfZ.Reset(spawnZ); ekfYaw.Reset(0);
-            }
-            LogSecs("📦 輸送帶 A 投入新物料 (進料速度 0.12 m/s)", "host");
-        }
-        catch (Exception ex)
-        {
-            LogSecs($"⚠️ 生成物料異常: {ex.Message}", "alarm");
-        }
     }
 
     private async Task PlanAndGraspWithFullPhysics(CancellationToken ct)
@@ -2335,12 +2107,10 @@
         }
 
         w1 = 0; w2 = 0; w3 = 0; w4 = 0; w5 = 0; w6 = 0;
-        compOffsetX = 0.0; compOffsetY = 0.0;
 
-        plannerStatus = "EXEC_TRY_1";
-        LogSecs("S6F11: CEID 1001 (OnePassJob_Started)", "eq");
-        diagnosticMessage = "[Pick 階段] Fab 標準工作空間直線進刀 + PBVS 姿態伺服...";
-        LogPhaseTruthComparison("STAGE_1_PREHEAT_COMPLETE");
+        plannerStatus = "PROCESSING";
+        LogSecs("S6F11 CEID=1001 (Job_Started)", "eq");
+        diagnosticMessage = "Executing Cartesian approach and PBVS alignment.";
         await InvokeAsync(StateHasChanged);
 
         await SetIRBeamState(false);
@@ -2349,16 +2119,13 @@
 
         if (!graspSuccess && !ct.IsCancellationRequested)
         {
-            plannerStatus = "RECOVERY_RETRACT";
+            plannerStatus = "RECOVERY";
             await SetIRBeamState(false);
-            
-            compOffsetX = 0.0;
-            compOffsetY = 0.0;
 
-            LogSecs("S5F1: ALID 501 (Edge_Grasp_Risk_Alarm)", "alarm");
-            LogSecs($"S6F11: CEID 1002 (Grasp_Failed_Safety_Retract)", "eq");
+            LogSecs("S5F1 ALID=501 (Edge_Grasp_Risk)", "alarm");
+            LogSecs($"S6F11 CEID=1002 (Grasp_Failed)", "eq");
 
-            diagnosticMessage = $"⚠️ 相機/F/T 觸發 E84 告警！觸發工作空間直線退刀保護...";
+            diagnosticMessage = "Alarm triggered. Executing safety retract.";
             LogDetailedFailureDiagnostics("EXEC_TRY_1_FAILED");
             await InvokeAsync(StateHasChanged);
 
@@ -2367,23 +2134,22 @@
             await ExecuteFabStandardUnloadSequence(fkTcpX, fkTcpY, j1Angle, j2Angle, j3Angle, j4Angle, j5Angle, j6Angle, ct: ct);
             await Task.Delay(200, ct);
 
-            plannerStatus = "EXEC_RETRY_2_COMPENSATED";
-            LogSecs("S5F1: ALID 501 (Alarm Cleared)", "eq");
-            LogSecs("S6F11: CEID 1005 (Retry_Attempt)", "eq");
+            plannerStatus = "RECOVERY";
+            LogSecs("S5F1 ALID=501 CLEARED", "eq");
+            LogSecs("S6F11 CEID=1005 (Retry_Attempt)", "eq");
 
-            diagnosticMessage = $"🔄【二次 PBVS 閉迴路伺服重試】...";
-            LogPhaseTruthComparison("STAGE_2_RETRY_START");
+            diagnosticMessage = "Executing PBVS retry attempt.";
             await InvokeAsync(StateHasChanged);
 
             bool retrySuccess = await ExecuteGraspSequence(compX: 0, compY: 0, ct: ct);
 
             if (!retrySuccess && !ct.IsCancellationRequested)
             {
-                plannerStatus = "FAILED_CLEANUP";
-                LogSecs("S5F1: ALID 502 (Grasp_Fatal_Failure_Alarm)", "alarm");
-                diagnosticMessage = "❌ 二次重試仍未達標，觸發安全退刀復歸。";
+                plannerStatus = "ABORTED";
+                LogSecs("S5F1 ALID=502 (Grasp_Fatal_Failure)", "alarm");
+                diagnosticMessage = "Retry failed. Transfer aborted.";
                 LogDetailedFailureDiagnostics("EXEC_RETRY_2_FATAL");
-                gemControlState = "ALARM / PAUSED";
+                gemControlState = "ALARM";
                 await ClearE84Signals();
                 await InvokeAsync(StateHasChanged);
 
@@ -2394,8 +2160,8 @@
 
     private async Task AbortGraspAndEscapeToSafety(CancellationToken ct)
     {
-        LogSecs("🛡️ [安全逃逸 Interlock] 抓取失敗/告警觸發，發動工作空間垂直緊急抬升 (+20cm)...", "alarm");
-        
+        LogSecs("Interlock activated. Executing emergency Z-axis retract.", "alarm");
+
         await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", false, false);
         isGrasped = false;
 
@@ -2403,7 +2169,7 @@
         double startY = fkTcpY;
         double startZ = fkTcpZ;
         double escapeZ = startZ + 0.20;
-        
+
         admittanceOffsetZ = 0.0;
         admittanceVelZ = 0.0;
 
@@ -2411,28 +2177,15 @@
         await ExecuteUprisingArchHomeSequence(ct: ct);
     }
 
-    // 🎯 核心抓取與動態追蹤序列 (絕對速度匹配 Velocity Feedforward，零滯後無縫貼合)
     private async Task<bool> ExecuteGraspSequence(double compX = 0, double compY = 0, CancellationToken ct = default)
     {
         double ikJ1 = 0, ikJ2 = 0, ikJ3 = 0, ikJ4 = 0, ikJ5 = 0, ikJ6 = 0;
         double targetCompX = estX + compX;
-
-        double estDist = Math.Abs(targetCompX - fkTcpX) + Math.Abs(estY - fkTcpY) + Math.Abs((estZ + 0.15) - fkTcpZ);
-        int estSteps = Math.Clamp((int)(estDist * 0.50), 20, 80);
-        double actualFlyTime = estSteps * 0.015;
-
-        double leadOffset = (activeScenario == 3) ? (0.12 * actualFlyTime) : 0.0;
-        double targetCompY = (activeScenario == 3) ? (estY + leadOffset + compOffsetY) : (estY + compY);
-        double stagingZ = estZ + 0.15; 
+        double targetCompY = estY + compY;
+        double stagingZ = estZ + 0.15;
 
         if (SolveIK(targetCompX, targetCompY, stagingZ, estYaw, out double stageJ1, out double stageJ2, out double stageJ3, out double stageJ4, out double stageJ5, out double stageJ6))
         {
-            if (activeScenario == 3)
-            {
-                LogSecs($"[Algorithm] 3D Predictive Intercept | EstDist:{estDist:F3}m | FlyTime:{actualFlyTime:F3}s | LeadOffset:{leadOffset:F4}m", "host");
-                LogSecs($"[Command] S-Curve CP Motion to Staging | Tgt J1~J6: ({stageJ1:F1}°,{stageJ2:F1}°,{stageJ3:F1}°,{stageJ4:F1}°,{stageJ5:F1}°,{stageJ6:F1}°)", "host");
-            }
-
             var waypoints = new List<JointState>
             {
                 new JointState { J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = j5Angle, J6 = j6Angle, Grip = gripperDist },
@@ -2442,68 +2195,46 @@
             await SetIRBeamState(false);
             await MoveAlongSCurvePathWithDynamics(waypoints, isPrecision: false, ct: ct);
 
-            LogSecs("⏳ [INP Wait] 啟動 1:1 實時一階平滑 3D 斜向動態追蹤 (帶動態對齊門閘)...", "host");
-            
-            bool isAligned = false;
-            int maxInpLoops = (activeScenario == 3) ? 120 : 60;
-            // 🌟 核心修正：將追蹤起點打釘在出爪落點 (targetCompY)，避免 100Hz 鎖相第一幀階動躍變！
-            double trackedY = (activeScenario == 3) ? targetCompY : estY;
+            LogSecs("Awaiting in-position (INP) convergence.", "host");
 
-            if (activeScenario == 3) LogSecs($"[Algorithm] Velocity Feedforward (0.12m/s) Activated", "host");
+            bool isAligned = false;
+            int maxInpLoops = 60;
 
             for (int k = 0; k < maxInpLoops; k++)
             {
                 if (ct.IsCancellationRequested) return false;
 
-                // 速度前饋 (Velocity Feedforward)：接近物料時以 0.12m/s 勻速跟隨，無縫貼合
-                double distToTarget = Math.Abs(fkTcpY - estY);
-                if (activeScenario == 3 && distToTarget < 0.03) {
-                    trackedY += 0.12 * 0.01; 
-                } else {
-                    trackedY = trackedY * 0.85 + estY * 0.15; 
-                }
-
-                double liveStagingY = (activeScenario == 3) ? trackedY : targetCompY;
-                
-                if (SolveIK(targetCompX, liveStagingY, stagingZ, estYaw, out stageJ1, out stageJ2, out stageJ3, out stageJ4, out stageJ5, out stageJ6))
+                if (SolveIK(targetCompX, targetCompY, stagingZ, estYaw, out stageJ1, out stageJ2, out stageJ3, out stageJ4, out stageJ5, out stageJ6))
                 {
                     StepFullMultibodyDynamics(stageJ1, stageJ2, stageJ3, stageJ4, stageJ5, stageJ6, isPrecisionZone: true, dt: 0.01);
-                }
-
-                // 🌟 CEID 1010: 全息追蹤輸出 (200ms 取樣)
-                if (activeScenario == 3 && k % 20 == 0)
-                {
-                    LogSecs($"[Track-Log {k}] GT_Y:{gtY:F3}m | EKF_Y:{estY:F3}m | TrackedY:{liveStagingY:F3}m | J1~J6:({j1Angle:F1}°,{j2Angle:F1}°,{j3Angle:F1}°,{j4Angle:F1}°,{j5Angle:F1}°,{j6Angle:F1}°)", "eq");
                 }
 
                 await SyncToSim();
                 await Task.Delay(10, ct);
 
-                double posErrXY = Math.Sqrt(Math.Pow(fkTcpX - targetCompX, 2) + Math.Pow(fkTcpY - liveStagingY, 2));
+                double posErrXY = Math.Sqrt(Math.Pow(fkTcpX - targetCompX, 2) + Math.Pow(fkTcpY - targetCompY, 2));
                 if (posErrXY < 0.003 && Math.Abs(w1) < 0.05)
                 {
                     isAligned = true;
-                    break; 
+                    break;
                 }
             }
 
-            if (!isAligned && activeScenario != 3)
+            if (!isAligned)
             {
-                diagnosticMessage = "⚠️ [對準失敗] 預備位姿態/位置未能在時限內收斂，發動安全退刀！";
+                diagnosticMessage = "ALARM: Alignment timeout. Initiating safety retract.";
                 LogDetailedFailureDiagnostics("PREPAIR_ALIGNMENT_TIMEOUT");
                 await AbortGraspAndEscapeToSafety(ct);
                 return false;
             }
-
-            LogPhaseTruthComparison("ALIGNMENT_READY");
 
             if (activeScenario == 1)
             {
                 await ExecuteE84HandshakeSequence(isPlace: false);
             }
 
-            LogSecs("📐 [Pick Step 2] 純笛卡兒 100% 垂直向下俯衝 (Z 軸向下，極致精度)...", "host");
-            
+            LogSecs("Executing Z-axis vertical approach.", "host");
+
             int descendSteps = 50;
             double descendStartZ = fkTcpZ;
 
@@ -2513,38 +2244,26 @@
                 eeTipZ = fkTcpZ;
                 await InvokeAsync(StateHasChanged);
 
-                if (tofLaserDist <= 0.005 || isPhotoelectricBroken) break; 
+                if (tofLaserDist <= 0.005 || isPhotoelectricBroken) break;
 
                 double t = (double)step / descendSteps;
                 double smoothT = t * t * (3.0 - 2.0 * t);
-                double currZ = descendStartZ - ((descendStartZ - estZ) * smoothT); 
+                double currZ = descendStartZ - ((descendStartZ - estZ) * smoothT);
 
-                // 🌟 絕對速度匹配 (Absolute Velocity Matching)：捨棄遲滯濾波，100% 同步輸送帶推進
-                trackedY += (activeScenario == 3) ? (0.12 * 0.01) : 0.0;
-                double currX = targetCompX;
-                double currY = (activeScenario == 3) ? trackedY : targetCompY; 
-                
-                if (SolveIK(currX, currY, currZ, estYaw, out ikJ1, out ikJ2, out ikJ3, out ikJ4, out ikJ5, out ikJ6))
+                if (SolveIK(targetCompX, targetCompY, currZ, estYaw, out ikJ1, out ikJ2, out ikJ3, out ikJ4, out ikJ5, out ikJ6))
                 {
                     StepFullMultibodyDynamics(ikJ1, ikJ2, ikJ3, ikJ4, ikJ5, ikJ6, isPrecisionZone: true, dt: 0.01);
-                }
-
-                if (activeScenario == 3 && step % 10 == 0)
-                {
-                    LogSecs($"[Descend-Log {step}] Z:{currZ:F3}m | GT_Y:{gtY:F3}m | TrackedY:{currY:F3}m | J1~J6:({j1Angle:F1}°,{j2Angle:F1}°,{j3Angle:F1}°,{j4Angle:F1}°,{j5Angle:F1}°,{j6Angle:F1}°)", "eq");
                 }
 
                 await SyncToSim();
                 await Task.Delay(10, ct);
             }
 
-            LogPhaseTruthComparison("BEFORE_GRIP_CLOSE");
-
             bool isPhysicalContactVerified = isPhotoelectricBroken && pressureLeft >= 12.0;
 
             if (!isPhysicalContactVerified && overlapRatio < MIN_OVERLAP_RATIO_LIMIT)
             {
-                diagnosticMessage = $"⚠️ [E84 相機警告] 包覆率不足 ({overlapRatio:P0} < 65%)！拒絕閉合，發動緊急抬升逃逸！";
+                diagnosticMessage = $"ALARM: Grasp rejected (Overlap {overlapRatio:P0} < 65%). Retracting.";
                 LogDetailedFailureDiagnostics("OVERLAP_RATIO_DEFICIENCY");
                 await SetIRBeamState(false);
                 await InvokeAsync(StateHasChanged);
@@ -2564,26 +2283,9 @@
                 double t = (double)s / pinchSteps;
                 double smoothT = t * t * (3.0 - 2.0 * t);
                 gripperDist = startGrip + (SOLID_GRIP_LIMIT - startGrip) * smoothT;
-                
-                if (activeScenario == 3)
-                {
-                    // 🌟 絕對速度匹配：夾爪閉合瞬間仍保持 0.12m/s 平移，消除應力拉扯
-                    trackedY += 0.12 * 0.01; 
-                    if (SolveIK(targetCompX, trackedY, fkTcpZ, estYaw, out ikJ1, out ikJ2, out ikJ3, out ikJ4, out ikJ5, out ikJ6))
-                    {
-                        StepFullMultibodyDynamics(ikJ1, ikJ2, ikJ3, ikJ4, ikJ5, ikJ6, isPrecisionZone: true, dt: 0.01);
-                    }
-                }
-                else
-                {
-                    StepFullMultibodyDynamics(holdJ1, holdJ2, holdJ3, holdJ4, holdJ5, holdJ6, isPrecisionZone: true, dt: 0.01);
-                }
 
-                if (activeScenario == 3 && s % 8 == 0)
-                {
-                    LogSecs($"[Pinch-Log {s}] Grip:{gripperDist:F3}m | Torque:{tippingTorque:F3}Nm | J1~J6:({j1Angle:F1}°,{j2Angle:F1}°,{j3Angle:F1}°,{j4Angle:F1}°,{j5Angle:F1}°,{j6Angle:F1}°)", "eq");
-                }
-                
+                StepFullMultibodyDynamics(holdJ1, holdJ2, holdJ3, holdJ4, holdJ5, holdJ6, isPrecisionZone: true, dt: 0.01);
+
                 await SyncToSim();
                 await Task.Delay(10, ct);
             }
@@ -2598,7 +2300,7 @@
 
             if (tippingTorque > MAX_TIPPING_TORQUE_LIMIT)
             {
-                diagnosticMessage = $"⚠ [E84 F/T 警告] 偏心傾覆力矩過大 ({tippingTorque:F2} Nm > 0.15Nm)！發動緊急抬升逃逸！";
+                diagnosticMessage = $"ALARM: Tipping torque exceeded limit ({tippingTorque:F2} Nm). Retracting.";
                 LogDetailedFailureDiagnostics("TIPPING_TORQUE_EXCEEDED");
                 await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", false, false);
                 isGrasped = false;
@@ -2611,7 +2313,7 @@
 
             if (!isGrasped)
             {
-                diagnosticMessage = "⚠️️ [抓取失敗] 未成功閉合附著物體，發動緊急抬升逃逸！";
+                diagnosticMessage = "ALARM: Grasp verification failed. Retracting.";
                 await SetIRBeamState(false);
                 await InvokeAsync(StateHasChanged);
 
@@ -2621,9 +2323,8 @@
 
             if (isGrasped)
             {
-                if (activeScenario == 1) LogSecs("E84 PI/O: Active Asserted [COMP = ON, BUSY = OFF]", "host");
-                diagnosticMessage = $"🎉 [Pick 成功] 物理多重確認對齊成功，發動姿勢擺正移載...";
-                LogPhaseTruthComparison("GRASP_SUCCESS_TRANSFER_START");
+                if (activeScenario == 1) LogSecs("E84 PI/O: COMP=ON, BUSY=OFF", "host");
+                diagnosticMessage = "Pick sequence complete. Initiating transfer.";
                 await InvokeAsync(StateHasChanged);
 
                 if (activeScenario == 1)
@@ -2638,7 +2339,7 @@
                     bool ikSolved = false;
                     for (int k = 0; k < 30; k++)
                     {
-                        double r = 0.60 + random.NextDouble() * 0.45; 
+                        double r = 0.60 + random.NextDouble() * 0.45;
                         double ang = (random.NextDouble() * 240.0 - 120.0) * (Math.PI / 180.0);
                         placeX = r * Math.Sin(ang);
                         placeY = r * Math.Cos(ang);
@@ -2654,8 +2355,8 @@
                         targetJ2 = ikJ2; targetJ3 = ikJ3; targetJ4 = ikJ4; targetJ5 = ikJ5; targetJ6 = ikJ6;
                     }
 
-                    LogSecs($"[Transport] 關節 CP 圓弧平移至: X={placeX:F2}, Y={placeY:F2} (手腕姿態擺正至 Yaw=0.0°)", "host");
-                    diagnosticMessage = "CP 關節圓弧軌跡平移中 (E84 護航 + 姿態擺正)...";
+                    LogSecs($"Executing CP transport to X={placeX:F2}, Y={placeY:F2}.", "host");
+                    diagnosticMessage = "Executing CP trajectory.";
                     await InvokeAsync(StateHasChanged);
 
                     await ExecuteE84HandshakeSequence(isPlace: true);
@@ -2664,13 +2365,13 @@
 
                     var cpWaypoints = new List<JointState>
                     {
-                        new JointState { J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = ikJ5, J6 = ikJ6, Grip = SOLID_GRIP_LIMIT }, 
-                        new JointState { J1 = pStgJ1, J2 = pStgJ2, J3 = pStgJ3, J4 = pStgJ4, J5 = pStgJ5, J6 = pStgJ6, Grip = SOLID_GRIP_LIMIT } 
+                        new JointState { J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = ikJ5, J6 = ikJ6, Grip = SOLID_GRIP_LIMIT },
+                        new JointState { J1 = pStgJ1, J2 = pStgJ2, J3 = pStgJ3, J4 = pStgJ4, J5 = pStgJ5, J6 = pStgJ6, Grip = SOLID_GRIP_LIMIT }
                     };
 
                     await MoveAlongSCurvePathWithDynamics(cpWaypoints, isPrecision: true, isLifting: true, ct: ct);
 
-                    LogSecs("⏳ [INP Wait] 等待姿態擺正與馬達動態誤差收斂 (In-Position)...", "host");
+                    LogSecs("Awaiting in-position (INP) convergence for place.", "host");
                     for (int k = 0; k < 10; k++)
                     {
                         if (ct.IsCancellationRequested) return false;
@@ -2679,8 +2380,8 @@
                         await Task.Delay(10, ct);
                     }
 
-                    LogSecs("📐 [Place Step 2] 純笛卡兒 100% 垂直向下放座...", "host");
-                    
+                    LogSecs("Executing Z-axis vertical place.", "host");
+
                     double placeDescendStartX = fkTcpX;
                     double placeDescendStartY = fkTcpY;
                     await MoveLinearTaskSpace(placeDescendStartX, placeDescendStartY, fkTcpZ, placeDescendStartX, placeDescendStartY, GROUND_Z, 0.0, steps: 0, ct: ct);
@@ -2689,19 +2390,19 @@
                     isGrasped = false;
 
                     await SmoothOpenGripperToHomeLimit(ct: ct);
-                    
-                    LogSecs("S6F11: CEID 1006 (E84_Place_Completed)", "eq");
-                    diagnosticMessage = "🎉 [成功] 放座完成，發動晶圓廠標準退刀 (Fab Standard Exit)...";
+
+                    LogSecs("S6F11 CEID=1006 (Place_Completed)", "eq");
+                    diagnosticMessage = "Place complete. Executing retract sequence.";
                     await InvokeAsync(StateHasChanged);
 
                     await ExecuteFabStandardUnloadSequence(placeDescendStartX, placeDescendStartY, j1Angle, j2Angle, j3Angle, j4Angle, j5Angle, j6Angle, ct: ct);
-                    
+
                     await Task.Delay(100, ct);
                     await ClearE84Signals();
-                    LogSecs("E84 PI/O: [Place] 卸載與直線退刀結束，紅外線光束關閉", "host");
-                    
-                    plannerStatus = "SUCCESS";
-                    gemControlState = "REMOTE / ONLINE";
+                    LogSecs("E84 PI/O: Transfer complete. Optical transceiver off.", "host");
+
+                    plannerStatus = "STANDBY";
+                    gemControlState = "REMOTE";
                     isTransferDone = true;
                 }
                 return true;
@@ -2716,12 +2417,12 @@
 
     private async Task ExecuteUprisingArchHomeSequence(CancellationToken ct = default)
     {
-        var startPose = new JointState { 
-            J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = j5Angle, J6 = j6Angle, Grip = gripperDist 
+        var startPose = new JointState {
+            J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = j5Angle, J6 = j6Angle, Grip = gripperDist
         };
 
-        var homePose = new JointState { 
-            J1 = FAB_HOME_J1, J2 = FAB_HOME_J2, J3 = FAB_HOME_J3, J4 = FAB_HOME_J4, J5 = FAB_HOME_J5, J6 = FAB_HOME_J6, Grip = FAB_HOME_GRIP 
+        var homePose = new JointState {
+            J1 = FAB_HOME_J1, J2 = FAB_HOME_J2, J3 = FAB_HOME_J3, J4 = FAB_HOME_J4, J5 = FAB_HOME_J5, J6 = FAB_HOME_J6, Grip = FAB_HOME_GRIP
         };
 
         var archWaypoints = new List<JointState>
@@ -2730,7 +2431,7 @@
             homePose
         };
 
-        LogSecs("🚀 啟動晶圓廠標準 HOME 軌跡 (平滑連貫單軌縮臂歸位)", "host");
+        LogSecs("[Motion] Initiating HOME trajectory.", "host");
         await MoveAlongSCurvePathWithDynamics(archWaypoints, isPrecision: false, isLifting: false, ct: ct);
     }
 
@@ -2738,10 +2439,10 @@
     {
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
-        
+
         w1 = 0; w2 = 0; w3 = 0; w4 = 0; w5 = 0; w6 = 0;
         admittanceOffsetZ = 0.0; admittanceVelZ = 0.0;
-        LogSecs("S6F11: CEID 1004 (Robot_Retracted_To_Home)", "eq");
+        LogSecs("S6F11 CEID=1004 (Robot_At_Home)", "eq");
         await ClearE84Signals();
 
         try
@@ -2750,10 +2451,10 @@
         }
         catch (OperationCanceledException) { }
 
-        plannerStatus = "IDLE";
-        gemControlState = "REMOTE / ONLINE";
+        plannerStatus = "STANDBY";
+        gemControlState = "REMOTE";
         isGrasped = false;
-        diagnosticMessage = "已回到晶圓廠標準極小懸臂 HOME 姿態。";
+        diagnosticMessage = "Robot at HOME position.";
     }
 
     private async Task MoveWithFullPhysicsEngine(double targetJ1, double targetJ2, double targetJ3, double targetJ4, double targetGrip)
@@ -2800,15 +2501,538 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    public ValueTask DisposeAsync()
+    // ═══════════════════════ Scenario 3 : Conveyor Tracking Cell ═══════════════════════
+
+    public class ConstantVelocityKalman
+    {
+        private double y, v, p00 = 0.01, p01 = 0.0, p11 = 0.01;
+        private readonly double qAcc;
+        public ConstantVelocityKalman(double qAcc = 0.05) { this.qAcc = qAcc; }
+        public double Position => y;
+        public double Velocity => v;
+        public double PredictAt(double dtAhead) => y + v * dtAhead;
+
+        public void Reset(double y0, double v0) { y = y0; v = v0; p00 = 0.0004; p01 = 0.0; p11 = 0.0004; }
+
+        public void Predict(double dt)
+        {
+            double n00 = p00 + 2 * dt * p01 + dt * dt * p11 + qAcc * dt * dt * dt / 3.0;
+            double n01 = p01 + dt * p11 + qAcc * dt * dt / 2.0;
+            double n11 = p11 + qAcc * dt;
+            y += v * dt; p00 = n00; p01 = n01; p11 = n11;
+        }
+        public void UpdatePosition(double meas, double r)
+        {
+            double s = p00 + r, k0 = p00 / s, k1 = p01 / s, innov = meas - y;
+            y += k0 * innov; v += k1 * innov;
+            double n00 = (1 - k0) * p00, n01 = (1 - k0) * p01, n11 = p11 - k1 * p01;
+            p00 = n00; p01 = n01; p11 = n11;
+        }
+        public void UpdateVelocity(double meas, double r)
+        {
+            double s = p11 + r, k0 = p01 / s, k1 = p11 / s, innov = meas - v;
+            y += k0 * innov; v += k1 * innov;
+            double n00 = p00 - k0 * p01, n01 = p01 - k0 * p11, n11 = (1 - k1) * p11;
+            p00 = n00; p01 = n01; p11 = n11;
+        }
+    }
+
+    private enum CellState { Idle, Waiting, Intercept, Sync, Picking, Transfer, Placing, Returning, Paused }
+    private enum PickResult { Ok, Unreachable, Failed }
+    private enum PartCheck { None, Ready, Missed }
+
+    private sealed class CellConfig
+    {
+        public double PickWindowUpY = -0.60;      
+        public double PickWindowDownY = 0.35;     
+        public double StandbyY = -0.45;           
+        public double StandbyZ = 0.30;            
+        public double UpstreamMarginM = 0.05;     
+        public double SyncTimeS = 0.45;           
+        public double DescendTimeS = 0.45;        
+        public double PinchTimeS = 0.25;          
+        public double LiftTimeS = 0.30;           
+        public double PlaceX = 0.0;               
+        public double PlaceY = 0.75;
+        public double PlaceZ = 0.14;
+        public double SpeedScale = 1.0;           
+        public int MaxRetry = 1;                  
+        public double BeltASpeedNominal = 0.12;
+    }
+    private readonly CellConfig cfg = new CellConfig();
+
+    private const double S3_PEAK_J1 = 120.0, S3_PEAK_J2 = 80.0, S3_PEAK_J3 = 120.0, S3_PEAK_J6 = 180.0;
+
+    private readonly System.Diagnostics.Stopwatch _clock = System.Diagnostics.Stopwatch.StartNew();
+    private double NowS => _clock.Elapsed.TotalSeconds;
+
+    private ConstantVelocityKalman _kfY = new ConstantVelocityKalman(0.05);
+    private bool _kfInit = false;
+    private int _kfRejects = 0;
+    private double _kfLastT = 0.0, _lastPacketS = -999.0;
+    private long _partSerial = 0, _handledSerial = 0;
+    private int _partSeq = 0;
+    private double BeltV => _kfY.Velocity > 0.02 ? _kfY.Velocity : cfg.BeltASpeedNominal;
+    private double PredictY(double tAbs) => _kfY.PredictAt(tAbs - _kfLastT);
+
+    private CellState cellState = CellState.Idle;
+    private volatile bool _pauseReq, _stopReq;
+    private CancellationTokenSource _cellCts;
+    private Task _cellTask = Task.CompletedTask;
+    private int cellPicked, cellMissed, cellSkipped, cellAlarms, _activeAlid;
+    private double _runStartS, _trackErrMm, _lastCycleS;
+    private double Uph => cellPicked * 3600.0 / Math.Max(1.0, NowS - _runStartS);
+
+    private string E10Category => cellState switch
+    {
+        CellState.Idle => "STANDBY",
+        CellState.Waiting => "STANDBY",
+        CellState.Paused => "SCHEDULED DOWN",
+        _ => "PRODUCTIVE"
+    };
+
+    private readonly struct InterceptPlan
+    {
+        public bool Feasible { get; init; }
+        public string Reason { get; init; }
+        public double T { get; init; }
+        public double YArrival { get; init; }
+        public JointState Stage { get; init; }
+    }
+
+    private void LogCeid(int ceid, string name, string rpt = "")
+        => LogSecs($"S6F11 CEID={ceid} ({name})" + (rpt.Length > 0 ? " RPT: " + rpt : ""), "eq");
+
+    private void SetCell(CellState s)
+    {
+        if (cellState == s) return;
+        var prev = cellState; cellState = s;
+        LogSecs($"S6F11 CEID=3100 (State_Change) PREV={prev} NEW={s}", "eq");
+    }
+
+    private void RaiseAlarm(int alid, string text)
+    {
+        cellAlarms++; _activeAlid = alid;
+        diagnosticMessage = $"ALARM {alid}: {text}";
+        LogSecs($"S5F1 ALID={alid} ALCD=86 ({text})", "alarm");
+    }
+
+    private void ClearAlarm()
+    {
+        if (_activeAlid == 0) return;
+        LogSecs($"S5F1 ALID={_activeAlid} ALCD=00 CLEARED", "eq");
+        _activeAlid = 0;
+    }
+
+    private async Task Scenario3HostCmd(string rcmd)
+    {
+        int hcack = 0;
+        LogSecs($"S2F41 Host Command '{rcmd}'", "host");
+        bool running = !_cellTask.IsCompleted;
+
+        switch (rcmd)
+        {
+            case "START":
+                if (running || activeScenario != 3) { hcack = 2; break; }
+                _stopReq = false; _pauseReq = false;
+                _kfInit = false; _handledSerial = _partSerial;
+                cellPicked = 0; cellMissed = 0; cellSkipped = 0; cellAlarms = 0; _activeAlid = 0;
+                _cts ??= new CancellationTokenSource();
+                _cellCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
+                var token = _cellCts.Token;
+                _cellTask = Task.Run(() => RunScenario3Cell(token));
+                break;
+            case "PAUSE":
+                if (!running || _pauseReq) hcack = 2; else _pauseReq = true;
+                break;
+            case "RESUME":
+                if (!running || !_pauseReq) hcack = 2; else _pauseReq = false;
+                break;
+            case "STOP":
+                if (!running) hcack = 2; else { _stopReq = true; _pauseReq = false; }
+                break;
+            case "ABORT":
+                _cellCts?.Cancel();
+                try { await _cellTask; } catch (Exception) { }
+                if (isGrasped)
+                {
+                    await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", false, false);
+                    isGrasped = false;
+                    RaiseAlarm(3006, "Part_Held_At_Abort");
+                }
+                _pauseReq = false; _stopReq = false;
+                await ResetPose();
+                break;
+            default:
+                hcack = 1; break;
+        }
+        LogSecs($"S2F42 HCACK={hcack}", hcack == 0 ? "eq" : "alarm");
+    }
+
+    private async Task RunScenario3Cell(CancellationToken ct)
+    {
+        try
+        {
+            _runStartS = NowS;
+            gemControlState = "EXECUTING";
+            LogCeid(3101, "AutoRun_Started");
+            LogSecs($"S2F14 ECV PickWindowY=[{cfg.PickWindowUpY:F2},{cfg.PickWindowDownY:F2}]m SpeedScale={cfg.SpeedScale:F2}", "eq");
+            bool atStandby = false;
+
+            while (!ct.IsCancellationRequested && activeScenario == 3 && !_stopReq)
+            {
+                if (_pauseReq)
+                {
+                    SetCell(CellState.Paused);
+                    while (_pauseReq && !_stopReq) await Task.Delay(100, ct);
+                    continue;
+                }
+
+                var chk = CheckPendingPart();
+                if (chk == PartCheck.Missed)
+                {
+                    _handledSerial = _partSerial;
+                    cellMissed++;
+                    LogCeid(3008, "Part_Missed_Window", $"Y={PredictY(NowS):F3}m");
+                }
+                else if (chk == PartCheck.Ready)
+                {
+                    _handledSerial = _partSerial;
+                    isExecutingTask = true;
+                    try { await RunScenario3Cycle(ct); }
+                    finally { isExecutingTask = false; }
+                    atStandby = false;
+                }
+                else
+                {
+                    SetCell(CellState.Waiting);
+                    if (!atStandby) { await MoveToStandby(ct); atStandby = true; SetCell(CellState.Waiting); }
+                    else await Task.Delay(15, ct);
+                }
+            }
+        }
+        catch (OperationCanceledException) { }
+        catch (Exception ex) { RaiseAlarm(3099, $"Cell_Exception: {ex.Message}"); }
+        finally
+        {
+            SetCell(CellState.Idle);
+            gemControlState = "REMOTE";
+            LogCeid(3102, "AutoRun_Stopped", $"Picked={cellPicked} Skipped={cellSkipped} Missed={cellMissed}");
+        }
+    }
+
+    private PartCheck CheckPendingPart()
+    {
+        if (_partSerial == _handledSerial) return PartCheck.None;
+        if (NowS - _lastPacketS > 0.15) return PartCheck.None;
+        if (Math.Abs(estX + 0.75) > 0.20) return PartCheck.None;
+        double y = PredictY(NowS);
+        if (y > cfg.PickWindowDownY) return PartCheck.Missed;
+        return y >= cfg.PickWindowUpY ? PartCheck.Ready : PartCheck.None;
+    }
+
+    private bool PartStillAvailable()
+    {
+        if (_partSerial != _handledSerial) return false;
+        if (NowS - _lastPacketS > 0.15) return false;
+        double y = PredictY(NowS);
+        return y >= cfg.PickWindowUpY && y <= cfg.PickWindowDownY - BeltV * 1.0;
+    }
+
+    private async Task RunScenario3Cycle(CancellationToken ct)
+    {
+        double tStart = NowS;
+        string partId = $"WFR_{++_partSeq:0000}";
+        LogCeid(3001, "Part_Detected", $"PartID={partId} Y={estY:F3}m");
+
+        int attempt = 0;
+        while (true)
+        {
+            var res = await TrackedPick(partId, ct);
+            if (res == PickResult.Ok) break;
+            if (res == PickResult.Unreachable) { cellSkipped++; return; }
+
+            attempt++;
+            if (attempt > cfg.MaxRetry || !PartStillAvailable())
+            {
+                cellMissed++;
+                RaiseAlarm(3001, $"Pick_Failed PartID={partId}");
+                return;
+            }
+            LogCeid(3007, "Pick_Retry", $"PartID={partId} Attempt={attempt + 1}");
+        }
+
+        await FlyingPlace(partId, ct);
+        cellPicked++;
+        _lastCycleS = NowS - tStart;
+        ClearAlarm();
+        LogCeid(3010, "Cycle_Complete", $"PartID={partId} CycleTime={_lastCycleS:F2}s");
+    }
+
+    private static double MinJerk(double s) => s * s * s * (10.0 - 15.0 * s + 6.0 * s * s);
+
+    private JointState CurrentJoints() => new JointState
+    {
+        J1 = j1Angle, J2 = j2Angle, J3 = j3Angle, J4 = j4Angle, J5 = j5Angle, J6 = j6Angle, Grip = gripperDist
+    };
+
+    private static JointState ToJoints(double j1, double j2, double j3, double j4, double j5, double j6, double grip) => new JointState
+    {
+        J1 = j1, J2 = j2, J3 = j3, J4 = j4, J5 = j5, J6 = j6, Grip = grip
+    };
+
+    private double EstimateMoveTime(JointState a, JointState b)
+    {
+        double k = Math.Max(0.2, cfg.SpeedScale);
+        double t = Math.Max(
+            Math.Max(Math.Abs(b.J1 - a.J1) / (S3_PEAK_J1 * k), Math.Abs(b.J2 - a.J2) / (S3_PEAK_J2 * k)),
+            Math.Max(Math.Abs(b.J3 - a.J3) / (S3_PEAK_J3 * k), Math.Abs(b.J6 - a.J6) / (S3_PEAK_J6 * k)));
+        return Math.Max(0.30, t * 1.875);
+    }
+
+    private async Task MoveJointsTimed(List<JointState> wps, CancellationToken ct)
+    {
+        double[] seg = new double[wps.Count - 1];
+        double total = 0;
+        for (int i = 0; i < seg.Length; i++) { seg[i] = EstimateMoveTime(wps[i], wps[i + 1]); total += seg[i]; }
+
+        double t0 = NowS, last = t0;
+        while (true)
+        {
+            ct.ThrowIfCancellationRequested();
+            double now = NowS;
+            double tau = Math.Clamp((now - t0) / total, 0.0, 1.0);
+            var tg = EvaluateGlobalSCurveTarget(wps, seg, total, tau);
+            int sub = Math.Clamp((int)Math.Round((now - last) / 0.01), 1, 4);
+            last = now;
+            for (int i = 0; i < sub; i++)
+                StepFullMultibodyDynamics(tg.J1, tg.J2, tg.J3, tg.J4, tg.J5, tg.J6, isPrecisionZone: true, dt: 0.01);
+            gripperDist = tg.Grip;
+            await SyncToSim();
+            if (tau >= 1.0) break;
+            await Task.Delay(8, ct);
+        }
+    }
+
+    private async Task<bool> RunTrackedPhase(
+        double duration,
+        Func<double, double, (double x, double y, double z)> target,
+        double yawDeg, bool liveYaw, bool lifting, CancellationToken ct,
+        Func<double, double> gripAt = null, Func<bool> earlyExit = null)
+    {
+        double t0 = NowS, last = t0;
+        double yawCmd = liveYaw ? estYaw : yawDeg;
+        int ikFail = 0;
+
+        while (true)
+        {
+            ct.ThrowIfCancellationRequested();
+            double now = NowS;
+            double s = Math.Clamp((now - t0) / duration, 0.0, 1.0);
+            if (liveYaw) yawCmd = yawCmd * 0.9 + estYaw * 0.1; 
+
+            var (tx, ty, tz) = target(s, now);
+            if (SolveIK(tx, ty, tz, yawCmd, out double a, out double b, out double c, out double d, out double e, out double f))
+            {
+                ikFail = 0;
+                int sub = Math.Clamp((int)Math.Round((now - last) / 0.01), 1, 4);
+                for (int i = 0; i < sub; i++)
+                    StepFullMultibodyDynamics(a, b, c, d, e, f, isPrecisionZone: true, isLiftingMode: lifting, dt: 0.01);
+            }
+            else if (++ikFail > 15) return false;
+
+            last = now;
+            if (gripAt != null) gripperDist = gripAt(s);
+            await SyncToSim();
+
+            if (earlyExit != null && earlyExit()) return true;
+            if (s >= 1.0) return true;
+            await Task.Delay(8, ct);
+        }
+    }
+
+    private InterceptPlan PlanIntercept()
+    {
+        var cur = CurrentJoints();
+        double v = BeltV, x = estX, z = estZ + 0.15, T = 0.6;
+        JointState stage = cur;
+
+        for (int it = 0; it < 6; it++)
+        {
+            double stageY = PredictY(NowS + T) - cfg.UpstreamMarginM;
+            if (!SolveIK(x, stageY, z, estYaw, out double a, out double b, out double c, out double d, out double e, out double f))
+                return new InterceptPlan { Feasible = false, Reason = $"IK_UNREACHABLE" };
+
+            stage = ToJoints(a, b, c, d, e, f, FAB_HOME_GRIP);
+            double Tn = EstimateMoveTime(cur, stage);
+            bool converged = Math.Abs(Tn - T) < 0.02;
+            T = Tn;
+            if (converged) break;
+        }
+
+        double yArr = PredictY(NowS + T);
+        double pickDur = cfg.SyncTimeS + cfg.DescendTimeS + cfg.PinchTimeS + cfg.LiftTimeS;
+        if (yArr + v * pickDur > cfg.PickWindowDownY)
+            return new InterceptPlan { Feasible = false, Reason = $"TIME_DEFICIT" };
+
+        return new InterceptPlan { Feasible = true, T = T, YArrival = yArr, Stage = stage };
+    }
+
+    private async Task MoveToStandby(CancellationToken ct)
+    {
+        SetCell(CellState.Returning);
+        if (!SolveIK(-0.75, cfg.StandbyY, cfg.StandbyZ, 0.0, out double a, out double b, out double c, out double d, out double e, out double f))
+        {
+            RaiseAlarm(3011, "Standby_IK_Fail");
+            return;
+        }
+        await MoveJointsTimed(new List<JointState> { CurrentJoints(), ToJoints(a, b, c, d, e, f, FAB_HOME_GRIP) }, ct);
+        LogCeid(3004, "Arm_At_Standby");
+    }
+
+    private async Task PickEscape(double px, Func<double, double> refY, double zFrom, CancellationToken ct)
+    {
+        double g0 = gripperDist, yawLock = estYaw;
+        await RunTrackedPhase(0.30, (s, t) => (px, refY(t), zFrom + 0.15 * MinJerk(s)),
+            yawLock, false, false, ct, gripAt: s => g0 + (FAB_HOME_GRIP - g0) * MinJerk(s));
+    }
+
+    private async Task<PickResult> TrackedPick(string partId, CancellationToken ct)
+    {
+        SetCell(CellState.Intercept);
+        admittanceOffsetZ = 0.0; admittanceVelZ = 0.0;
+
+        var plan = PlanIntercept();
+        if (!plan.Feasible)
+        {
+            LogCeid(3008, "Part_Skipped_Unreachable", $"PartID={partId}");
+            return PickResult.Unreachable;
+        }
+        
+        await MoveJointsTimed(new List<JointState> { CurrentJoints(), plan.Stage }, ct);
+
+        SetCell(CellState.Sync);
+        double px = estX, stageZ = estZ + 0.15;
+        double offX = fkTcpX - px, offY = fkTcpY - PredictY(NowS);
+        bool ok = await RunTrackedPhase(cfg.SyncTimeS,
+            (s, t) => { double k = 1.0 - MinJerk(s); return (px + offX * k, PredictY(t) + offY * k, stageZ); },
+            0, true, false, ct);
+
+        double err = Math.Sqrt(Math.Pow(fkTcpX - px, 2) + Math.Pow(fkTcpY - PredictY(NowS), 2));
+        if (!ok || err > 0.008)
+        {
+            ok = await RunTrackedPhase(0.30, (s, t) => (px, PredictY(t), stageZ), 0, true, false, ct);
+            err = Math.Sqrt(Math.Pow(fkTcpX - px, 2) + Math.Pow(fkTcpY - PredictY(NowS), 2));
+            if (!ok || err > 0.008)
+            {
+                LogCeid(3009, "Sync_Timeout", $"PartID={partId}");
+                return PickResult.Failed;
+            }
+        }
+        _trackErrMm = err * 1000.0;
+
+        SetCell(CellState.Picking);
+        double z0 = fkTcpZ, zg = estZ;
+        await RunTrackedPhase(cfg.DescendTimeS,
+            (s, t) => (px, PredictY(t), z0 + (zg - z0) * MinJerk(s)),
+            0, true, false, ct, earlyExit: () => pressureLeft > 20.0 || pressureRight > 20.0);
+
+        double tRef = NowS, yRef0 = PredictY(tRef), vRef = BeltV, yawLock = estYaw;
+        Func<double, double> refY = t => yRef0 + vRef * (t - tRef);
+
+        bool contact = isPhotoelectricBroken && pressureLeft >= 12.0;
+        if (!contact && overlapRatio < MIN_OVERLAP_RATIO_LIMIT)
+        {
+            RaiseAlarm(3002, $"Edge_Grasp_Risk");
+            LogDetailedFailureDiagnostics("S3_OVERLAP_DEFICIENCY");
+            await PickEscape(px, refY, zg, ct);
+            return PickResult.Failed;
+        }
+
+        double g0 = gripperDist;
+        await RunTrackedPhase(cfg.PinchTimeS, (s, t) => (px, refY(t), zg),
+            yawLock, false, false, ct, gripAt: s => g0 + (SOLID_GRIP_LIMIT - g0) * MinJerk(s));
+        await RunTrackedPhase(0.06, (s, t) => (px, refY(t), zg), yawLock, false, false, ct);
+
+        if (isPhotoelectricBroken && pressureLeft >= 12.0)
+        {
+            await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", true, false);
+            isGrasped = true;
+        }
+
+        if (!isGrasped || tippingTorque > MAX_TIPPING_TORQUE_LIMIT)
+        {
+            RaiseAlarm(3003, isGrasped ? $"Tipping_Torque_High" : "Grip_Not_Confirmed");
+            LogDetailedFailureDiagnostics("S3_GRIP_VERIFY");
+            await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", false, false);
+            isGrasped = false;
+            await PickEscape(px, refY, zg, ct);
+            return PickResult.Failed;
+        }
+
+        await RunTrackedPhase(cfg.LiftTimeS, (s, t) => (px, refY(t), zg + 0.14 * MinJerk(s)),
+            yawLock, false, true, ct);
+
+        LogCeid(3003, "Part_Picked", $"PartID={partId}");
+        return PickResult.Ok;
+    }
+
+    private async Task FlyingPlace(string partId, CancellationToken ct)
+    {
+        SetCell(CellState.Transfer);
+        double vB = BeltV;                                    
+        double stageZ = cfg.PlaceZ + 0.15;
+        double xArr = cfg.PlaceX - vB * (cfg.SyncTimeS + cfg.DescendTimeS);
+
+        if (!SolveIK(xArr, cfg.PlaceY, stageZ, 0.0, out double a, out double b, out double c, out double d, out double e, out double f))
+        {
+            RaiseAlarm(3004, "Place_IK_Fail");
+            await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", false, false);
+            isGrasped = false;
+            return;
+        }
+
+        var cur = CurrentJoints();
+        var stage = ToJoints(a, b, c, d, e, f, SOLID_GRIP_LIMIT);
+        double T = EstimateMoveTime(cur, stage);
+        double tRel = NowS + T + cfg.SyncTimeS + cfg.DescendTimeS;      
+        Func<double, double> slotX = t => cfg.PlaceX + vB * (t - tRel);
+
+        await MoveJointsTimed(new List<JointState> { cur, stage }, ct);
+
+        SetCell(CellState.Placing);
+        double offX = fkTcpX - slotX(NowS), offY = fkTcpY - cfg.PlaceY;
+        await RunTrackedPhase(cfg.SyncTimeS,
+            (s, t) => { double k = 1.0 - MinJerk(s); return (slotX(t) + offX * k, cfg.PlaceY + offY * k, stageZ); },
+            0.0, false, true, ct);
+
+        double z0 = fkTcpZ;
+        await RunTrackedPhase(cfg.DescendTimeS,
+            (s, t) => (slotX(t), cfg.PlaceY, z0 + (cfg.PlaceZ - z0) * MinJerk(s)),
+            0.0, false, true, ct);
+
+        await JSRuntime.InvokeVoidAsync("ros2ForceAttachBox", false, true);
+        isGrasped = false;
+        LogCeid(3006, "Part_Placed", $"PartID={partId}");
+
+        double g0 = gripperDist;
+        await RunTrackedPhase(0.25, (s, t) => (slotX(t), cfg.PlaceY, cfg.PlaceZ),
+            0.0, false, false, ct, gripAt: s => g0 + (FAB_HOME_GRIP - g0) * MinJerk(s));
+        await RunTrackedPhase(0.25, (s, t) => (slotX(t), cfg.PlaceY, cfg.PlaceZ + 0.15 * MinJerk(s)),
+            0.0, false, false, ct, gripAt: s => FAB_HOME_GRIP);
+    }
+
+
+    public async ValueTask DisposeAsync()
     {
         _cts?.Cancel();
+        _cellCts?.Cancel();
+        try { await JSRuntime.InvokeVoidAsync("ros2Dispose"); } catch (Exception) { }
         _simLock.Dispose();
         if (objRef != null)
         {
             objRef.Dispose();
         }
-        return ValueTask.CompletedTask;
     }
 }
 
