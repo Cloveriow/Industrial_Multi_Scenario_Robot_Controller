@@ -29,7 +29,7 @@
 
             <!-- 🎛️ 情境切換頁籤 -->
             <div class="scenario-tabs">
-                <button class="@(activeScenario == 1 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(1)">1. SEMI E84 Wafer</button>
+                <button class="@(activeScenario == 1 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(1)">1. SEMI E84</button>
                 <button class="@(activeScenario == 2 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(2)">2. 7-DOF Rail</button>
                 <button class="@(activeScenario == 3 ? "tab-btn active" : "tab-btn")" @onclick="() => SwitchScenario(3)">3. Conveyor Tracking</button>
             </div>
@@ -283,7 +283,7 @@
 
     private int activeScenario = 1;
     private string activeScenarioName => activeScenario switch {
-        1 => "SEMI E84 Wafer Handling",
+        1 => "SEMI E84 Handling",
         2 => "7-DOF Linear Rail Station",
         3 => "Conveyor Tracking Cell",
         _ => "Unknown"
@@ -299,10 +299,8 @@
     private string gemControlState = "REMOTE";
     private string boxPhysicsStatus = "Grounded";
     private string diagnosticMessage = "System Ready. Awaiting Host Command.";
-    private string overlapStatus = "SAFE";
     private string currentJobId = "JOB_WFR_001";
 
-    private string e84State = "E84_IDLE";
     private bool e84Valid = false, e84Cs0 = false, e84TrReq = false, e84Busy = false, e84Comp = false, e84Ready = false;
     private bool e84HoAvbl = true, e84LReq = true;
     private bool isIRBeamOn = false;
@@ -320,7 +318,6 @@
     private double estX = 0.25, estY = 0.75, estZ = GROUND_Z, estYaw = 0.0;
 
     private double fkTcpX = 0.0, fkTcpY = 0.0, fkTcpZ = 0.0;
-    private double compOffsetX = 0.0, compOffsetY = 0.0;
     private double realDist = 99.0;
     private double eeTipZ = 0;
 
@@ -446,8 +443,6 @@
             admittanceVelZ = 0.0;
             activePayloadMass = 0.0;
 
-            compOffsetX = 0.0;
-            compOffsetY = 0.0;
             w1 = 0; w2 = 0; w3 = 0; w4 = 0; w5 = 0; w6 = 0;
             normalForce = 0.0; frictionForce = 0.0; tippingTorque = 0.0;
 
@@ -466,7 +461,6 @@
             gemControlState = "REMOTE";
             boxPhysicsStatus = "Grounded";
             overlapRatio = 1.0;
-            overlapStatus = "SAFE";
 
             _kfInit = false; _partSerial = 0; _handledSerial = 0;
             _pauseReq = false; _stopReq = false;
@@ -1479,15 +1473,6 @@
             }
 
             overlapRatio = packet.OverlapRatio;
-
-            if (overlapRatio < MIN_OVERLAP_RATIO_LIMIT)
-            {
-                overlapStatus = "EDGE_RISK";
-            }
-            else
-            {
-                overlapStatus = "SAFE";
-            }
 
             if ((DateTime.Now - _lastUiRenderTime).TotalMilliseconds >= UI_RENDER_INTERVAL_MS)
             {
@@ -2544,7 +2529,7 @@
     private sealed class CellConfig
     {
         public double PickWindowUpY = -0.60;      
-        public double PickWindowDownY = 0.35;     
+        public double PickWindowDownY = 0.60; // 擴大追蹤下游邊界，解決時間赤字導致的遺漏
         public double StandbyY = -0.45;           
         public double StandbyZ = 0.30;            
         public double UpstreamMarginM = 0.05;     
@@ -2635,7 +2620,8 @@
             case "START":
                 if (running || activeScenario != 3) { hcack = 2; break; }
                 _stopReq = false; _pauseReq = false;
-                _kfInit = false; _handledSerial = _partSerial;
+                _kfInit = false; 
+                _handledSerial = _partSerial - 1; // 修正序列號判定，強制抓取已在視野內的物體
                 cellPicked = 0; cellMissed = 0; cellSkipped = 0; cellAlarms = 0; _activeAlid = 0;
                 _cts ??= new CancellationTokenSource();
                 _cellCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token);
@@ -3035,4 +3021,5 @@
         }
     }
 }
+
 
